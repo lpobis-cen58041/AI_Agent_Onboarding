@@ -85,6 +85,12 @@ import urllib.error
 from pathlib import Path
 from typing import Any
 
+try:  # use the OS trust store (corporate CA in macOS Keychain / Windows cert store)
+    import truststore
+    truststore.inject_into_ssl()
+except ImportError:
+    pass
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST_PATH = REPO_ROOT / ".github" / "scripts" / "csas-sources.manifest.json"
 DEFAULT_WIKI_DIR = REPO_ROOT / "source-documentation" / "notes" / "robot-styleguide" / "wiki"
