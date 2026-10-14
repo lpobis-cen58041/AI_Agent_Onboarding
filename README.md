@@ -43,6 +43,16 @@ Then open the repo in VS Code and talk to the `perf-setup` agent. On first run i
   - `glossary.md` – terms explained to non-technical users
   - `template/` – sample repo (Gatling + Kotlin, domain-based layout, detekt)
 
+## Tests
+```bash
+pip install -r requirements-dev.txt
+python -m pytest -q tests
+```
+Deterministic checks (no model, no network, nothing is submitted): config files, agent safety rules and script
+references, no secrets/snapshots tracked, scripts compile, `request_access.py` dry run/abort behaviour, the sample
+template (env key parity, CI rows, domain layout, no internal hosts) and `scaffold.py`. Runs in GitHub Actions
+(`.github/workflows/test.yml`), which also builds the scaffolded sample (`scaffold.py` runs `./mvnw -q test`, then `detekt:check`).
+
 ## Maintenance
 - **Wiki changed?** `python wiki.py status` shows NEW/CHANGED/REMOVED; `refresh` updates snapshots. Then check
   whether `access.json`, `tickets.json` or the agent text need updating.
