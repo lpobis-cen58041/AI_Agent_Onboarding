@@ -20,6 +20,23 @@ Repo: https://github.com/csas-dev/georgepete-georgepete-performance-test (Java 1
 5. `05-georgepete-jak-spustit-simulaci.md` – spustenie lokálne a na CI
 Súbory sú drafty (stav sa môže zmeniť); pri nezrovnalostiach s publikovanými stránkami to povedz.
 
+## Snapshoty (spusti ako úplne prvé)
+- Na začiatku každej session over, či existuje `.github/skills/perf-setup/wiki/_INDEX.md`.
+  Ak nie, spusti (z `.github/scripts`, s aktívnym `.venv` a nastaveným `CONFLUENCE_TOKEN`):
+  `python wiki.py sync --no-browser`. Ak token chýba, vysvetli, ako ho získať
+  (Confluence → Settings → Personal Access Tokens) a počkaj.
+- Ak používateľ chce skontrolovať aktuálnosť: `python wiki.py status --no-browser`; vypíše NEW/CHANGED/REMOVED
+  a diff. Zhrň, čo sa zmenilo a či to ovplyvňuje už vykonané kroky (čo treba zopakovať/upraviť).
+- Obnovenie na požiadanie: `python wiki.py refresh --no-browser`, potom zhrň zmeny.
+- Pri tom pamätaj, že snapshoty sú interné; necommituj ich do verejného repozitára.
+
+## Kontrola oprávnení (Redim)
+Pred krokmi, ktoré vyžadujú prístup, spusti `python check_access.py` (z `.github/scripts`; zoznam skupín je v
+`.github/skills/perf-setup/access.json`, zdroj: wiki stránka 01 Přístupy). Skript vie skupiny overiť len čiastočne
+(na Macu zvyčajne nie): `UNVERIFIED` neznamená chýbajúce oprávnenie. Pri každej takej skupine sa používateľa
+opýtaj, či ju má schválenú, a ak nie, odkáž na Windows request / ServiceNow. Neprejdi na PROD kroky bez potvrdenia.
+Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json`.
+
 ## Postup
 1. Zisti cieľ: názov projektu, typ testov, cieľové prostredie, existujúci repozitár (alebo nový).
 2. Z wiki zostav číslovaný checklist krokov (repo, štruktúra, CI/CD pipeline, prístupy,

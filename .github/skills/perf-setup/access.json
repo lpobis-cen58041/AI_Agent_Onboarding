@@ -1,0 +1,17 @@
+{
+  "_note": "Source: wiki page 01 - GEORGEPETE - Pristupy - Vyvoj. 'CSINIGHB_DEV_GEORGEPETE_WRITE' is garbled in the export; verify the exact name (probably CSIN\\GHB_DEV_GEORGEPETE_WRITE).",
+  "groups": {
+    "prod": [
+      "CSIN\\ART_GEORGEPETE_DELETE",
+      "CSIN\\ART_GEORGEPETE_READ",
+      "CSIN\\GeorgePete_Viewer",
+      "CSIN\\GHB_DEV_GEORGEPETE_WRITE",
+      "XUC\\APIMAN_DEVELOPER"
+    ],
+    "test": [
+      "CSINT\\GeorgePete_Viewer",
+      "CSINT\\Alfred_Authentication_Users",
+      "CSINT\\Alfred_Performance_Testing"
+    ]
+  }
+}
