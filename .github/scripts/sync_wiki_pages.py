@@ -245,8 +245,23 @@ Stop-Process -Id $job.Id -ErrorAction SilentlyContinue
     return None
 
 
+def _load_secrets_file() -> None:
+    """Load KEY=VALUE lines from <repo>/secrets.txt (gitignored) into os.environ if not already set."""
+    for name in ("secrets.txt", ".env"):
+        f = Path(__file__).resolve().parents[2] / name
+        if not f.is_file():
+            continue
+        for line in f.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip().removeprefix("export ").strip(), v.strip().strip("'\""))
+
+
 def _auth_headers() -> dict[str, str]:
     """Resolve auth via: Edge SSO → CONFLUENCE_TOKEN → CONFLUENCE_COOKIE."""
+    _load_secrets_file()
     # Strategy 1: env var token (fastest, CI-friendly)
     token = os.environ.get("CONFLUENCE_TOKEN", "").strip()
     if token:

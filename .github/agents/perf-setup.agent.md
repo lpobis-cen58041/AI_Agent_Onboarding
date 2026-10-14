@@ -22,9 +22,11 @@ Súbory sú drafty (stav sa môže zmeniť); pri nezrovnalostiach s publikovaný
 
 ## Snapshoty (spusti ako úplne prvé)
 - Na začiatku každej session over, či existuje `.github/skills/perf-setup/wiki/_INDEX.md`.
-  Ak nie, spusti (z `.github/scripts`, s aktívnym `.venv` a nastaveným `CONFLUENCE_TOKEN`):
-  `python wiki.py sync --no-browser`. Ak token chýba, vysvetli, ako ho získať
-  (Confluence → Settings → Personal Access Tokens) a počkaj.
+  Ak nie, spusti (z `.github/scripts`, s aktívnym `.venv`):
+  `python wiki.py sync --no-browser`. Token sa číta z `secrets.txt` v koreni repozitára (riadok
+  `CONFLUENCE_TOKEN=...`, súbor je v .gitignore) alebo z premennej prostredia. Ak token chýba, nikdy ho nežiadaj
+  v chate; vysvetli, ako ho získať (Confluence → Settings → Personal Access Tokens), nech ho vloží do `secrets.txt`
+  (vzor: `secrets.example.txt`), a počkaj. Obsah `secrets.txt` nikdy nečítaj ani nevypisuj.
 - Ak používateľ chce skontrolovať aktuálnosť: `python wiki.py status --no-browser`; vypíše NEW/CHANGED/REMOVED
   a diff. Zhrň, čo sa zmenilo a či to ovplyvňuje už vykonané kroky (čo treba zopakovať/upraviť).
 - Obnovenie na požiadanie: `python wiki.py refresh --no-browser`, potom zhrň zmeny.
