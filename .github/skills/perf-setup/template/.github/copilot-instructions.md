@@ -4,6 +4,7 @@
 ```bash
 ./mvnw -q test-compile          # PR gate
 ./mvnw test                     # unit tests
+./mvnw detekt:check             # static analysis (config: detekt.yml, run in PR check)
 ./mvnw -q gatling:test -Dgatling.simulationClass="cz.example.perf.simulations.domain.items.ItemsMixSimulation" \
   -DbaseUrl="<BASE_URL>" -DdurationSec=30 -DtargetRps=2
 ```

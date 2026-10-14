@@ -133,6 +133,19 @@
         <artifactId>gatling-maven-plugin</artifactId>
         <version>${gatling-maven-plugin.version}</version>
       </plugin>
+      <plugin>
+        <groupId>com.github.ozsie</groupId>
+        <artifactId>detekt-maven-plugin</artifactId>
+        <version>1.23.7</version>
+        <configuration>
+          <input>${project.basedir}/src/main/kotlin</input>
+          <config>${project.basedir}/detekt.yml</config>
+          <report>
+            <report>txt:${project.build.directory}/detekt/detekt.txt</report>
+            <report>html:${project.build.directory}/detekt/detekt.html</report>
+          </report>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
