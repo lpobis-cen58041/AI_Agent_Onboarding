@@ -42,7 +42,11 @@ Práva sa NEžiadajú tiketom v ServiceNow, ale v REDiM (zdroj: KB0016397): PROD
 Schvaľovanie (podľa skúsenosti tímu): žiadosť najprv schvaľuje manažér zamestnanca, potom manažér/vlastník skupiny, ktorá spravuje danú aplikáciu.
 Žiadosti podávaj naraz pre všetky chýbajúce skupiny (začni s `XUC\APIMAN_DEVELOPER`), vysvetli používateľovi, kto bude schvaľovať, a ponúkni krátku správu
 pre manažéra („čakám na tvoje schválenie žiadosti X v REDiM“). Stav sa sleduje v REDiM, záložka „Žádosti“; po schválení znova spusti kontrolu.
-Agent žiadosť NEodosiela (REDiM nemá známe API); pripraví zoznam chýbajúcich skupín, odkaz na správny portál, postup klikania a návrh textu
+Ak má niekto v tíme API kľúč z API Manager (`REDIM_API_KEY`, `REDIM_REQUESTOR` v jeho `.env`), môže podať žiadosť za nováčika skriptom
+`python request_access.py --env test|prod --account <účet nováčika>`: predvolene len náhľad (dry run), odoslanie `--submit` až po napísaní „yes“,
+stav `--status <id>`. Odosielaj len na výslovnú požiadavku držiteľa kľúča, najprv na TEST; nováčik kľúč nemá a nikdy ho nežiadaj v chate.
+Skript je zatiaľ neoverený voči reálnemu API (siete banky sa odtiaľto nedá dosiahnuť).
+Agent žiadosť inak NEodosiela (REDiM nemá známe API); pripraví zoznam chýbajúcich skupín, odkaz na správny portál, postup klikania a návrh textu
 zdôvodnenia, odošle ju používateľ sám. Prvotné založenie používateľa v aplikácii Klient je samostatná ServiceNow žiadosť (KB0016397).
 Skupina `CSIN\GHB_DEV_GEORGEPETE_WRITE` je na wiki zapísaná poškodene (`CSINIGHB_…`); správny názov je potvrdený.
 

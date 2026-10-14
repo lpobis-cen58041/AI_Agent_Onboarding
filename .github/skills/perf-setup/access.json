@@ -18,5 +18,10 @@
     "prod": "https://iam.csin.cz/REDIM/my",
     "test": "https://iamstp.csint.cz/redim/my"
   },
-  "redim_tile": "Windows"
+  "redim_tile": "Windows",
+  "api": {
+    "test": "https://uat1-webapi-mila.vs.csin.cz/webapi/api/v2/redim",
+    "prod": "https://prod-webapi-mila.vs.csin.cz/webapi/api/v2/redim",
+    "_note": "MiLA GW, source: Confluence REDIM/8. REDIM API (API_Operace_AppAccess_v02). Needs an API key from API Manager with access to redim/requests."
+  }
 }
