@@ -61,13 +61,33 @@ def check_ide():
     report("IDE (IntelliJ / VS Code)", "OK" if found else "MISSING", ", ".join(found))
 
 
+def repo_slug(repo):
+    m = re.search(r"github\.com[:/]([^/]+/[^/]+?)(?:\.git)?/?$", repo)
+    return m.group(1) if m else None
+
+
 def check_github(repo):
+    slug = repo_slug(repo)
+    if shutil.which("gh"):
+        rc, out = run(["gh", "auth", "status", "--hostname", "github.com"])
+        if rc != 0:
+            return report("GitHub login", "NOT LOGGED IN", "run: gh auth login (then authorize SSO for the organization)")
+        report("GitHub login", "OK", "gh")
+        if slug:
+            rc, out = run(["gh", "api", f"repos/{slug}", "--jq", ".permissions.push"])
+            if rc == 0:
+                report("GitHub repo access", "OK", f"{slug} (write: {out})")
+            elif "SAML" in out or "SSO" in out:
+                report("GitHub repo access", "SSO NEEDED", "authorize the token for the organization (SSO)")
+            else:
+                report("GitHub repo access", "NO ACCESS", f"{slug}: logged in, but no access - ask for GitHub org/team membership")
+        return
     rc, out = run(["git", "ls-remote", "--heads", repo], timeout=40)
     if rc == 0:
         report("GitHub repo access", "OK", repo)
     else:
-        report("GitHub repo access", "NO ACCESS",
-               "no access OR git is not logged in (credential/SSO token); also check GitHub org/team membership. " + out.splitlines()[-1][:120])
+        report("GitHub repo access", "UNKNOWN",
+               "gh CLI not installed: install it (brew install gh), run gh auth login, re-run. " + out.splitlines()[-1][:100])
 
 
 def check_http(name, url, hint=""):

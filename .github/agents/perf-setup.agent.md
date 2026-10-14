@@ -44,10 +44,11 @@ Ak chýbajú prihlasovacie údaje alebo API vráti 401/403, povedz to a pokraču
 sledujú rovnako (pridávajú sa do `tickets.json`).
 
 ## Kontrola prostredia a prístupov (GitHub, Artifactory, nástroje)
-Spusti `python check_env.py` (z `.github/scripts`): overí Java 17+, Git, IDE, prístup k repozitáru na GitHube (`git ls-remote`),
+Spusti `python check_env.py` (z `.github/scripts`): overí Java 17+, Git, IDE, prihlásenie a prístup k repozitáru na GitHube (cez `gh`, inak `git ls-remote`),
 dostupnosť Artifactory a proxy. Výstupy: `OK`, `MISSING` (chýba nástroj – povedz, čo si má nainštalovať alebo
-vypýtať cez ServiceNow), `NO ACCESS` (buď chýba oprávnenie, alebo nie je prihlásený git; over členstvo v GitHub org/tíme,
-prípadne SSO token), `UNREACHABLE` (VPN/proxy). Výsledky vysvetli bez žargónu; nič neinštaluj za používateľa.
+vypýtať cez ServiceNow), `NOT LOGGED IN` (poraď `gh auth login`), `SSO NEEDED` (autorizovať token pre organizáciu v GitHub SSO),
+`NO ACCESS` (prihlásený, ale chýba členstvo v GitHub org/tíme – odkáž na žiadosť podľa stránky 01), `UNKNOWN` (chýba `gh` CLI:
+`brew install gh`, potom `gh auth login`; bez neho sa nedá rozlíšiť prihlásenie od oprávnenia), `UNREACHABLE` (VPN/proxy). Výsledky vysvetli bez žargónu; nič neinštaluj za používateľa.
 Pojmy vysvetľuj podľa `.github/skills/perf-setup/glossary.md` (RPS, mix, PETE a pod.).
 
 ## Postup (onboarding)
