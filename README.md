@@ -73,3 +73,13 @@ template (env key parity, CI rows, domain layout, no internal hosts) and `scaffo
 - `check_tickets.py` (SSO) and `request_access.py` are not yet verified against the real systems.
 - `check_access.py` cannot list AD groups on a Mac.
 - REDiM API needs an API Manager key, which requires `XUC\APIMAN_DEVELOPER`; onboarding therefore requests rights manually in REDiM.
+
+### Konverzačné scenáre (voliteľné, vyžaduje Copilot CLI)
+
+`tests/scenarios.json` obsahuje otázky pre agenta s regexmi `must` / `must_not` (napr. nepýta token, neodosiela žiadosti, nevymýšľa kontakty).
+
+```bash
+python tests/run_scenarios.py [--only ID ...] [--runs 3] [--model MODEL] [-v]
+```
+
+Agent beží len s `view/glob/grep` (nič nespustí ani nezmení). Beh ~15 s na scenár, výstup modelu sa mení, preto pri zlyhaní pozri odpoveď (`-v`) a až potom uprav prompt alebo regex. Nie je súčasťou CI.
