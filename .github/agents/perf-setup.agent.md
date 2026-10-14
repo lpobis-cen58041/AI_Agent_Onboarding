@@ -36,6 +36,13 @@ Pred krokmi, ktoré vyžadujú prístup, spusti `python check_access.py` (z `.gi
 opýtaj, či ju má schválenú, a ak nie, odkáž na Windows request / ServiceNow. Neprejdi na PROD kroky bez potvrdenia.
 Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json`.
 
+## Kontrola ServiceNow požiadaviek
+Po kontrole oprávnení spusti `python check_tickets.py` (z `.github/scripts`; položky sú v `.github/skills/perf-setup/tickets.json`;
+prihlasovacie údaje `SERVICENOW_*` v `.env`, nikdy ich nežiadaj v chate). Skript je len na čítanie. `FOUND` ukáže stav
+požiadavky, `MISSING` znamená, že sa k položke nenašla žiadna požiadavka: pošli odkaz zo skriptu, tiket zakladá používateľ sám.
+Ak chýbajú prihlasovacie údaje alebo API vráti 401/403, povedz to a pokračuj pýtaním sa používateľa. SaaS nástroje sa
+sledujú rovnako (pridávajú sa do `tickets.json`).
+
 ## Postup (onboarding)
 Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krokom sa spýtaj, či je jasné.
 1. **Čo je GEORGEPETE:** koncepčný prehľad z `02` (účel, hlavné časti), bez technických detailov.

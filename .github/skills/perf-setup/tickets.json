@@ -1,0 +1,11 @@
+{
+  "_note": "Keywords are matched (all must appear) against the request's short description / catalog item. Adjust to the real catalog item names. Add SaaS tools here.",
+  "required": [
+    {"name": "JDK 17 installation", "keywords": ["jdk"],
+     "how": "ServiceNow: Instalovat software (https://csasprod.service-now.com/esc?id=sc_cat_item&sys_id=5f8c2a80dbc4638034def5e51d96198b)"},
+    {"name": "IntelliJ IDEA installation", "keywords": ["intellij"],
+     "how": "ServiceNow: Instalovat software (same catalog item)"},
+    {"name": "Redim access - production", "keywords": ["georgepete"],
+     "how": "Windows request for the production Redim groups (see wiki 01 Pristupy)"}
+  ]
+}
