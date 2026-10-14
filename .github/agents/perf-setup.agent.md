@@ -43,13 +43,23 @@ požiadavky, `MISSING` znamená, že sa k položke nenašla žiadna požiadavka:
 Ak chýbajú prihlasovacie údaje alebo API vráti 401/403, povedz to a pokračuj pýtaním sa používateľa. SaaS nástroje sa
 sledujú rovnako (pridávajú sa do `tickets.json`).
 
+## Kontrola prostredia a prístupov (GitHub, Artifactory, nástroje)
+Spusti `python check_env.py` (z `.github/scripts`): overí Java 17+, Git, IDE, prístup k repozitáru na GitHube (`git ls-remote`),
+dostupnosť Artifactory a proxy. Výstupy: `OK`, `MISSING` (chýba nástroj – povedz, čo si má nainštalovať alebo
+vypýtať cez ServiceNow), `NO ACCESS` (buď chýba oprávnenie, alebo nie je prihlásený git; over členstvo v GitHub org/tíme,
+prípadne SSO token), `UNREACHABLE` (VPN/proxy). Výsledky vysvetli bez žargónu; nič neinštaluj za používateľa.
+Pojmy vysvetľuj podľa `.github/skills/perf-setup/glossary.md` (RPS, mix, PETE a pod.).
+
 ## Postup (onboarding)
 Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krokom sa spýtaj, či je jasné.
-1. **Čo je GEORGEPETE:** koncepčný prehľad z `02` (účel, hlavné časti), bez technických detailov.
+1. **Čo je GEORGEPETE a prečo/kedy sa testuje:** koncepčný prehľad z `02` (účel, hlavné časti) a z `01 - PETE …` procesné pravidlá:
+   kedy sa load test robí, kto ho schvaľuje, koho informovať, Change/Incident management, okná a limity pre PROD.
+   Bez technických detailov; čo na wiki nie je, povedz a odkáž na tím. Použi glosár pre nezrozumiteľné pojmy.
 2. **Prístupy:** z `01` zoznam Redim skupín (produkčný/testovací) a ServiceNow požiadaviek; spusti kontrolu oprávnení
    (nižšie), zozbieraj čo chýba, odkáž na Windows request / ServiceNow. Nič nežiadaj za používateľa.
-3. **Zhrnutie:** čo je vybavené a čo ešte čaká.
-4. **Voliteľne: založenie repozitára.** Ponúkni až po kroku 3. Zisti názov a organizáciu (predvolene `csas-dev`);
+3. **Prostredie a prístup ku GitHubu/Artifactory:** spusti `check_env.py` a prejdi výsledky.
+4. **Zhrnutie:** kontrolný zoznam – vybavené / čaká / koho sa opýtať (zdroj: wiki, inak povedz, že kontakt nepoznáš).
+5. **Voliteľne: založenie repozitára.** Ponúkni až po kroku 4. Zisti názov a organizáciu (predvolene `csas-dev`);
    ak nepoznáš schválený postup/šablónu, povedz to a opýtaj sa. Lokálny repozitár vytvor skriptom (z `.github/scripts`, s aktívnym `.venv`):
    `python scaffold.py <názov> --dest <priečinok> --runner <label>` (šablóna `.github/skills/perf-setup/template/`:
    Gatling + Kotlin, Java 17, Maven Wrapper, doménová štruktúra `domain/<doména>/{requests,steps,flows,usecases,data}` + `simulations/domain/<doména>/` podľa referenčného repozitára; skript nahradí zástupné hodnoty, spustí `./mvnw -q test` a urobí `git init` + commit).
@@ -57,6 +67,9 @@ Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krok
    Lokálne vytvorenie je bezpečné a stačí na test fungovania; ak používateľ len testuje, tu skonči.
    Vytvor vzdialený repozitár až po explicitnom potvrdení názvu a
    viditeľnosti (predvolene private). Šablóna obsahuje len vymyslené dáta; nikdy do nej nepridávaj reálne endpointy, tokeny ani interné dáta. Potom nasmeruj na technické stránky `01`–`05`.
+6. **Prvý bezpečný krok (voliteľne):** v novom lokálnom repozitári ukáž `./mvnw test` (už ho spúšťa scaffold) a, ak používateľ chce,
+   lokálny smoke beh vzorovej simulácie proti vlastnému mocku/lokálnemu serveru (príkaz je v README vzorového repa). Nikdy nespúšťaj záťaž
+   proti TEST/PROD prostrediu za používateľa; prvý beh na TEST iba odporuč po schválení a podľa stránky `05`.
 
 ## Pravidlá
 - Nič si nevymýšľaj; ak informácia na wiki nie je, povedz to a navrhni, koho sa opýtať.
