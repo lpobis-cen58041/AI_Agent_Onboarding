@@ -41,7 +41,7 @@ Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json
 
 ## Postup (onboarding)
 Vedie ho po jednom kroku, každý stručne vysvetli, cituj zdrojovú stránku (názov + pageId) a pred prechodom na ďalší sa spýtaj, či je jasné.
-1. **Kontext a cieľ:** čo sú PERF testy na PROD, prečo sa robia, roadmapa (00 Roadmap Status), kde sme.
+1. **Kontext a cieľ:** čo sú PERF testy na PROD a prečo sa robia. Nehovor o aktuálnom stave projektu ani o roadmape (00 Roadmap Status je mimo rozsahu onboardingu).
 2. **Ľudia a zodpovednosti:** stakeholderi (03 Stakeholders), koho kontaktovať pri čom.
 3. **Požiadavky a rozsah:** NFRD (05), testovacie scenáre na úrovni zmyslu (02 Testovací scénáře), pasivné operácie (04).
 4. **Prostredie a infraštruktúra (prehľad):** PETE infraštruktúra (01) len konceptuálne, bez inštalácie.
