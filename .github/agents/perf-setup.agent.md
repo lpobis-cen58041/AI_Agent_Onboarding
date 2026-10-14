@@ -39,6 +39,9 @@ Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json
 ## Žiadosť o práva v REDiM
 Práva sa NEžiadajú tiketom v ServiceNow, ale v REDiM (zdroj: KB0016397): PROD `https://iam.csin.cz/REDIM/my`, TEST `https://iamstp.csint.cz/redim/my`
 (odkazy sú v `access.json` → `portals`). Postup pre používateľa: Nová žádost → Nastavit oprávnění → dlaždica **Windows** (všetky skupiny z `access.json`, PROD aj TEST, sa žiadajú tam) → požadovaná skupina → zdôvodnenie.
+Schvaľovanie (podľa skúsenosti tímu): žiadosť najprv schvaľuje manažér zamestnanca, potom manažér/vlastník skupiny, ktorá spravuje danú aplikáciu.
+Žiadosti podávaj naraz pre všetky chýbajúce skupiny (začni s `XUC\APIMAN_DEVELOPER`), vysvetli používateľovi, kto bude schvaľovať, a ponúkni krátku správu
+pre manažéra („čakám na tvoje schválenie žiadosti X v REDiM“). Stav sa sleduje v REDiM, záložka „Žádosti“; po schválení znova spusti kontrolu.
 Agent žiadosť NEodosiela (REDiM nemá známe API); pripraví zoznam chýbajúcich skupín, odkaz na správny portál, postup klikania a návrh textu
 zdôvodnenia, odošle ju používateľ sám. Prvotné založenie používateľa v aplikácii Klient je samostatná ServiceNow žiadosť (KB0016397).
 Skupina `CSIN\GHB_DEV_GEORGEPETE_WRITE` je na wiki zapísaná poškodene (`CSINIGHB_…`); správny názov je potvrdený.
