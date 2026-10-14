@@ -2,7 +2,11 @@
 
 Only issues GET requests; never creates or changes tickets.
 
-  python check_tickets.py [--login jnovak] [--show-all]
+  python check_tickets.py [--login jnovak] [--team login1,login2] [--show-all]
+
+A request counts if it was requested for you OR opened by you, and, when --team / SERVICENOW_TEAM
+(comma-separated logins of colleagues) is given, also if a colleague opened it for you or requested it
+for themselves (e.g. a shared team ticket). Matches from colleagues are marked with who opened them.
 
 Config: ../skills/perf-setup/tickets.json (required items + keywords).
 Credentials (from .env or environment):
@@ -10,6 +14,7 @@ Credentials (from .env or environment):
   SERVICENOW_TOKEN=...                                  (Bearer/OAuth token)  or
   SERVICENOW_USER=... and SERVICENOW_PASSWORD=...       (Basic)
   SERVICENOW_LOGIN=...                                  (user_name of the requester; or use --login)
+  SERVICENOW_TEAM=login1,login2                         (optional colleagues; or use --team)
 Output per required item: FOUND (state) / MISSING. Exit 0 = all found, 2 = something missing, 1 = error.
 """
 import argparse
@@ -51,9 +56,18 @@ def get(base: str, path: str) -> list[dict]:
         raise RuntimeError(f"ServiceNow network error: {e.reason}") from e
 
 
+def who(i: dict, login: str) -> str:
+    """Return ' [opened by X for Y]' when the request was not simply opened by the user for themselves."""
+    rf, ob = i.get("request.requested_for"), i.get("request.opened_by")
+    name = lambda v: v.get("display_value", "") if isinstance(v, dict) else (v or "")
+    rf, ob = name(rf), name(ob)
+    return f" [opened by {ob or '?'} for {rf or '?'}]" if ob and rf and ob != rf else ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--login")
+    ap.add_argument("--team", help="comma-separated colleague logins")
     ap.add_argument("--show-all", action="store_true", help="also list all found requests")
     a = ap.parse_args()
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
@@ -64,9 +78,14 @@ def main() -> int:
         print("ERROR: provide --login or SERVICENOW_LOGIN (your ServiceNow user_name).", file=sys.stderr)
         return 1
 
-    query = f"request.requested_for.user_name={login}^ORDERBYDESCsys_created_on"
+    team = [t.strip() for t in (a.team or os.environ.get("SERVICENOW_TEAM", "")).split(",") if t.strip()]
+    clauses = [f"request.requested_for.user_name={login}", f"request.opened_by.user_name={login}"]
+    for t in team:
+        clauses += [f"request.opened_by.user_name={t}", f"request.requested_for.user_name={t}"]
+    query = "^OR".join(clauses) + "^ORDERBYDESCsys_created_on"
     path = ("/api/now/table/sc_req_item?sysparm_display_value=true&sysparm_limit=200"
-            "&sysparm_fields=number,short_description,cat_item,state,stage,opened_at"
+            "&sysparm_fields=number,short_description,cat_item,state,stage,opened_at,"
+            "request.requested_for,request.opened_by"
             f"&sysparm_query={urllib.parse.quote(query)}")
     try:
         items = get(base, path)
@@ -84,14 +103,15 @@ def main() -> int:
         hits = [i for i in items if all(k.lower() in text(i) for k in need["keywords"])]
         if hits:
             h = hits[0]
-            print(f"  FOUND    {need['name']}: {h['number']} - {h.get('state')} ({h.get('opened_at')})")
+            print(f"  FOUND    {need['name']}: {h['number']} - {h.get('state')} ({h.get('opened_at')})"
+                  f"{who(h, login)}")
         else:
             print(f"  MISSING  {need['name']}  -> {need.get('how', '')}")
             missing += 1
     if a.show_all:
         print("\nAll your requests:")
         for i in items:
-            print(f"  {i['number']}  {i.get('state')}  {i.get('short_description')}")
+            print(f"  {i['number']}  {i.get('state')}  {i.get('short_description')}{who(i, login)}")
     return 2 if missing else 0
 
 
