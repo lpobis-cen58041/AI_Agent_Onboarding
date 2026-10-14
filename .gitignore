@@ -6,3 +6,4 @@ secrets.txt
 *.secret
 .github/skills/perf-setup/wiki/
 .github/skills/perf-setup/manifest.json
+!.env.example

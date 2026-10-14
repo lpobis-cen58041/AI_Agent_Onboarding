@@ -246,8 +246,8 @@ Stop-Process -Id $job.Id -ErrorAction SilentlyContinue
 
 
 def _load_secrets_file() -> None:
-    """Load KEY=VALUE lines from <repo>/secrets.txt (gitignored) into os.environ if not already set."""
-    for name in ("secrets.txt", ".env"):
+    """Load KEY=VALUE lines from <repo>/.env (gitignored) into os.environ if not already set."""
+    for name in (".env",):
         f = Path(__file__).resolve().parents[2] / name
         if not f.is_file():
             continue
