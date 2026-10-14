@@ -212,3 +212,46 @@ def test_scaffold_creates_repo(tmp_path):
     assert not leftovers
     assert run("scaffold.py", "perf-sample-test", "--dest", str(tmp_path), "--no-test", "--no-git").returncode != 0
     assert run("scaffold.py", "Bad Name", "--dest", str(tmp_path)).returncode != 0
+
+
+# ---- new_domain.py + coding guide --------------------------------------------------------
+
+def _scaffolded(tmp_path):
+    assert run("scaffold.py", "nd", "--dest", str(tmp_path), "--no-test", "--no-git").returncode == 0
+    return tmp_path / "nd"
+
+
+def test_new_domain_creates_all_layers_and_registers_it(tmp_path):
+    repo = _scaffolded(tmp_path)
+    r = run("new_domain.py", str(repo), "orders", "--path", "/orders", "--method", "POST")
+    assert r.returncode == 0, r.stderr
+    k = repo / "src/main/kotlin/cz/example/perf"
+    for layer in ("data/OrdersFeeders", "requests/OrdersRequests", "steps/OrdersSteps",
+                  "flows/OrdersFlows", "usecases/OrdersUseCases"):
+        assert (k / "domain/orders" / f"{layer}.kt").exists()
+    assert (k / "simulations/domain/orders/OrdersMixSimulation.kt").exists()
+    assert (repo / "src/test/resources/orders/orders.csv").exists()
+    assert ".post(Paths.ordersEndpoint)" in (k / "domain/orders/requests/OrdersRequests.kt").read_text()
+    for env in ("test", "prod"):
+        assert "ordersEndpoint=/orders" in (repo / f"src/main/resources/env/{env}.properties").read_text()
+    assert "OrdersMixSimulation" in (repo / "ci/simulation-data.csv").read_text()
+
+
+def test_new_domain_dry_run_and_refusals(tmp_path):
+    repo = _scaffolded(tmp_path)
+    before = (repo / "ci/simulation-data.csv").read_text()
+    assert run("new_domain.py", str(repo), "orders", "--dry-run").returncode == 0
+    assert not (repo / "src/main/kotlin/cz/example/perf/domain/orders").exists()
+    assert (repo / "ci/simulation-data.csv").read_text() == before
+    assert run("new_domain.py", str(repo), "Bad_Name").returncode != 0
+    assert run("new_domain.py", str(repo), "items").returncode != 0          # already exists
+    assert run("new_domain.py", str(tmp_path), "orders").returncode != 0     # not a perf repo
+    assert run("new_domain.py", str(repo), "orders", "--path", "orders").returncode != 0
+
+
+def test_coding_guide_and_agent_are_linked():
+    guide = (SKILL / "coding-guide.md").read_text(encoding="utf-8")
+    assert "new_domain.py" in guide and "UseCasesTest" in guide
+    agent = AGENT.read_text(encoding="utf-8")
+    assert "coding-guide.md" in agent and "new_domain.py" in agent
+    assert "--dry-run" in agent

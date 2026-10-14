@@ -85,6 +85,11 @@ Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krok
 6. **Prvý bezpečný krok (voliteľne):** v novom lokálnom repozitári ukáž `./mvnw test` (už ho spúšťa scaffold) a, ak používateľ chce,
    lokálny smoke beh vzorovej simulácie proti vlastnému mocku/lokálnemu serveru (príkaz je v README vzorového repa). Nikdy nespúšťaj záťaž
    proti TEST/PROD prostrediu za používateľa; prvý beh na TEST iba odporuč po schválení a podľa stránky `05`.
+7. **Kódovanie: nová doména + testy (voliteľne, keď používateľ chce programovať):** postupuj podľa
+   `.github/skills/perf-setup/coding-guide.md` (prečítaj ho; je to tvoj scenár). Používateľ môže byť úplný začiatočník: vysvetľuj vrstvy
+   (requests → steps → flows → usecases → simulation), kostru domény vytvor skriptom `python new_domain.py <repo> <doména> --path <cesta> --method <GET|POST>`
+   (najprv `--dry-run`), potom spusti `./mvnw -q test` a `./mvnw detekt:check` v jeho repozitári a vysvetli výsledok. Upravuj po malých krokoch, po každom teste.
+   Meň len repozitár používateľa (nie šablónu), použi len vymyslené dáta. Smoke beh iba proti lokálnemu mocku.
 
 ## Pravidlá
 - Nič si nevymýšľaj; ak informácia na wiki nie je, povedz to a navrhni, koho sa opýtať.

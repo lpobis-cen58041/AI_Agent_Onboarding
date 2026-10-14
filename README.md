@@ -32,6 +32,7 @@ Then open the repo in VS Code and talk to the `perf-setup` agent. On first run i
 | `check_tickets.py` | read-only ServiceNow request check (SSO via browser cookie) | no |
 | `request_access.py` | submit REDiM requests via API; dry run by default, `--submit` + typed "yes" | only with `--submit` |
 | `scaffold.py <name> --dest <dir>` | create a local sample Gatling/Kotlin repo from the template | new local dir |
+| `new_domain.py <repo> <domain> [--path /x] [--method GET\|POST] [--dry-run]` | add a domain skeleton (all layers, simulation, unit test, env keys, CI row) to a scaffolded repo | new files + appends to env/CI csv |
 | `check_connection.py`, `read_page.py`, `crawl_confluence.py`, `sync_wiki_pages.py` | Confluence helpers (`sync_wiki_pages.py` holds shared auth + `.env` loader) | local files |
 
 ## Layout
@@ -83,3 +84,7 @@ python tests/run_scenarios.py [--only ID ...] [--runs 3] [--model MODEL] [-v]
 ```
 
 Agent beží len s `view/glob/grep` (nič nespustí ani nezmení). Beh ~15 s na scenár, výstup modelu sa mení, preto pri zlyhaní pozri odpoveď (`-v`) a až potom uprav prompt alebo regex. Nie je súčasťou CI.
+
+### Kódovanie s agentom
+
+Po onboardingu vie agent (krok 7) previesť úplného začiatočníka pridaním novej domény: vysvetlí vrstvy, vytvorí kostru cez `new_domain.py`, spustí `./mvnw -q test` a `detekt:check`, a pomôže ju upraviť. Scenár je v `.github/skills/perf-setup/coding-guide.md`.

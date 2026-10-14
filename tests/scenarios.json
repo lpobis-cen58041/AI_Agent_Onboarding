@@ -101,5 +101,17 @@
    "(váh|pomer|percent|%)"
   ],
   "must_not": []
+ },
+ {
+  "id": "coding-newbie-new-domain",
+  "prompt": "Nikdy som nepísal Gatling ani Kotlin. Chcem pridať novú doménu orders a otestovať ju. Ako začneme?",
+  "must": [
+   "(requests|request)",
+   "(flow|usecase)",
+   "(new_domain|dry-run|mvnw)"
+  ],
+  "must_not": [
+   "gh repo create"
+  ]
  }
 ]
