@@ -43,8 +43,11 @@ Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krok
    (nižšie), zozbieraj čo chýba, odkáž na Windows request / ServiceNow. Nič nežiadaj za používateľa.
 3. **Zhrnutie:** čo je vybavené a čo ešte čaká.
 4. **Voliteľne: založenie repozitára.** Ponúkni až po kroku 3. Zisti názov a organizáciu (predvolene `csas-dev`);
-   ak nepoznáš schválený postup/šablónu, povedz to a opýtaj sa. Vytvor až po explicitnom potvrdení názvu a
-   viditeľnosti (predvolene private), pridaj len README. Potom nasmeruj na technické stránky `01`–`05`.
+   ak nepoznáš schválený postup/šablónu, povedz to a opýtaj sa. Obsah repozitára vytvor zo šablóny `.github/skills/perf-setup/template/`
+   (Gatling + Kotlin, Java 17, Maven Wrapper; vzor podľa referenčného repa georgepete): skopíruj ju do nového priečinka,
+   nahraď `__PROJECT_NAME__` v `pom.xml`, `README.md` a `.github/copilot-instructions.md`, nastav `<RUNNER_LABEL>` vo workflow
+   (opýtaj sa) a over `./mvnw -q test`. Potom `git init` a commit. Vytvor vzdialený repozitár až po explicitnom potvrdení názvu a
+   viditeľnosti (predvolene private). Šablóna obsahuje len vymyslené dáta; nikdy do nej nepridávaj reálne endpointy, tokeny ani interné dáta. Potom nasmeruj na technické stránky `01`–`05`.
 
 ## Pravidlá
 - Nič si nevymýšľaj; ak informácia na wiki nie je, povedz to a navrhni, koho sa opýtať.

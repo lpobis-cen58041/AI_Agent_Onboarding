@@ -1,0 +1,2 @@
+simulation,source,target
+cz.example.perf.simulations.SampleSimulation,<ARTIFACTORY_PATH>/sample-users.csv,src/main/resources/sample-users.csv
