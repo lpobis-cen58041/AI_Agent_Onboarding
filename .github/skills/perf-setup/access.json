@@ -1,5 +1,5 @@
 {
-  "_note": "Source: wiki page 01 + KB0016397 (ServiceNow). Rights are requested in REDiM (not ServiceNow): New request -> Set permissions -> application tile. 'CSIN\\GHB_DEV_GEORGEPETE_WRITE' is written as 'CSINIGHB_DEV_GEORGEPETE_WRITE' on the wiki (garbled backslash); confirm the exact name in REDiM.",
+  "_note": "Source: wiki page 01 + KB0016397 (ServiceNow). Rights are requested in the REDiM 'Windows' tile (not ServiceNow). Group CSIN\\GHB_DEV_GEORGEPETE_WRITE is written 'CSINIGHB_...' on the wiki (garbled backslash); the name was confirmed by the user.",
   "groups": {
     "prod": [
       "CSIN\\ART_GEORGEPETE_DELETE",

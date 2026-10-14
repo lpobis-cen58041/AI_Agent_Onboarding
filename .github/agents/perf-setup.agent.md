@@ -41,7 +41,7 @@ Práva sa NEžiadajú tiketom v ServiceNow, ale v REDiM (zdroj: KB0016397): PROD
 (odkazy sú v `access.json` → `portals`). Postup pre používateľa: Nová žádost → Nastavit oprávnění → dlaždica **Windows** (všetky skupiny z `access.json`, PROD aj TEST, sa žiadajú tam) → požadovaná skupina → zdôvodnenie.
 Agent žiadosť NEodosiela (REDiM nemá známe API); pripraví zoznam chýbajúcich skupín, odkaz na správny portál, postup klikania a návrh textu
 zdôvodnenia, odošle ju používateľ sám. Prvotné založenie používateľa v aplikácii Klient je samostatná ServiceNow žiadosť (KB0016397).
-Názov skupiny `GHB_DEV_GEORGEPETE_WRITE` je na wiki poškodený (`CSINIGHB_…`); pred žiadosťou ho potvrď s používateľom/v REDiM.
+Skupina `CSIN\GHB_DEV_GEORGEPETE_WRITE` je na wiki zapísaná poškodene (`CSINIGHB_…`); správny názov je potvrdený.
 
 ## Kontrola ServiceNow požiadaviek
 Po kontrole oprávnení spusti `python check_tickets.py` (z `.github/scripts`; položky sú v `.github/skills/perf-setup/tickets.json`;
