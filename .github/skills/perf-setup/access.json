@@ -17,5 +17,6 @@
   "portals": {
     "prod": "https://iam.csin.cz/REDIM/my",
     "test": "https://iamstp.csint.cz/redim/my"
-  }
+  },
+  "redim_tile": "Windows"
 }
