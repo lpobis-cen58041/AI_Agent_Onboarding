@@ -4,7 +4,7 @@
   python wiki.py status    # compare Confluence with local snapshots, print changes + diffs (exit 2 if changed)
   python wiki.py refresh   # re-download everything, print what changed
 
-Config: ../skills/perf-setup/sources.json (root page + extra/draft pages).
+Config: ../skills/perf-setup/sources.json (extra_pages list; optional root_id crawls a whole tree).
 Auth: CONFLUENCE_TOKEN or CONFLUENCE_COOKIE (use --no-browser).
 """
 import argparse
@@ -26,17 +26,18 @@ CONFIG = SKILL / "sources.json"
 def fetch_all(cfg: dict) -> dict[str, dict]:
     """Return {filename: page record incl. 'md'} for the whole tree plus extra pages."""
     out: dict[str, dict] = {}
-    root = sw._confluence_get(f"/rest/api/content/{cfg['root_id']}")
-    queue = [(cfg["root_id"], root["title"], 0)]
-    seen: set[int] = set()
-    while queue:
-        pid, title, depth = queue.pop(0)
-        if pid in seen:
-            continue
-        seen.add(pid)
-        md, ver = sw._fetch_page_markdown(pid, title)
-        out[slug(title, pid)] = {"id": pid, "title": title, "depth": depth, "md": md, "ver": ver}
-        queue += [(k["id"], k["title"], depth + 1) for k in children(pid)]
+    if cfg.get("root_id"):
+        root = sw._confluence_get(f"/rest/api/content/{cfg['root_id']}")
+        queue = [(cfg["root_id"], root["title"], 0)]
+        seen: set[int] = set()
+        while queue:
+            pid, title, depth = queue.pop(0)
+            if pid in seen:
+                continue
+            seen.add(pid)
+            md, ver = sw._fetch_page_markdown(pid, title)
+            out[slug(title, pid)] = {"id": pid, "title": title, "depth": depth, "md": md, "ver": ver}
+            queue += [(k["id"], k["title"], depth + 1) for k in children(pid)]
     for ex in cfg.get("extra_pages", []):
         q = "expand=body.export_view,version" + ("&status=draft" if ex.get("draft") else "")
         try:

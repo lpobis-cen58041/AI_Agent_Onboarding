@@ -1,10 +1,29 @@
 {
-  "root_id": 1447887545,
   "extra_pages": [
-    {"id": 2318991891, "file": "01-georgepete-pristupy-vyvoj.md", "draft": true},
-    {"id": 2318992048, "file": "02-georgepete-prehled-architektury-projektu.md", "draft": true},
-    {"id": 2318992183, "file": "03-georgepete-simulace-a-testovaci-scenare.md", "draft": true},
-    {"id": 2318992259, "file": "04-georgepete-jak-pridat-nebo-upravit-scenar.md", "draft": true},
-    {"id": 2318992641, "file": "05-georgepete-jak-spustit-simulaci.md", "draft": true}
+    {
+      "id": 2318991891,
+      "file": "01-georgepete-pristupy-vyvoj.md",
+      "draft": true
+    },
+    {
+      "id": 2318992048,
+      "file": "02-georgepete-prehled-architektury-projektu.md",
+      "draft": true
+    },
+    {
+      "id": 2318992183,
+      "file": "03-georgepete-simulace-a-testovaci-scenare.md",
+      "draft": true
+    },
+    {
+      "id": 2318992259,
+      "file": "04-georgepete-jak-pridat-nebo-upravit-scenar.md",
+      "draft": true
+    },
+    {
+      "id": 2318992641,
+      "file": "05-georgepete-jak-spustit-simulaci.md",
+      "draft": true
+    }
   ]
 }
