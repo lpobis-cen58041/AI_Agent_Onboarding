@@ -33,8 +33,15 @@ Súbory sú drafty; ak niečo chýba alebo je nejasné, povedz to. Nič si nevym
 Pred krokmi, ktoré vyžadujú prístup, spusti `python check_access.py` (z `.github/scripts`; zoznam skupín je v
 `.github/skills/perf-setup/access.json`, zdroj: wiki stránka 01 Přístupy). Skript vie skupiny overiť len čiastočne
 (na Macu zvyčajne nie): `UNVERIFIED` neznamená chýbajúce oprávnenie. Pri každej takej skupine sa používateľa
-opýtaj, či ju má schválenú, a ak nie, odkáž na Windows request / ServiceNow. Neprejdi na PROD kroky bez potvrdenia.
+opýtaj, či ju má schválenú, a ak nie, odkáž na REDiM. Neprejdi na PROD kroky bez potvrdenia.
 Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json`.
+
+## Žiadosť o práva v REDiM
+Práva sa NEžiadajú tiketom v ServiceNow, ale v REDiM (zdroj: KB0016397): PROD `https://iam.csin.cz/REDIM/my`, TEST `https://iamstp.csint.cz/redim/my`
+(odkazy sú v `access.json` → `portals`). Postup pre používateľa: Nová žádost → Nastavit oprávnění → dlaždica aplikácie → požadovaná skupina → zdôvodnenie.
+Agent žiadosť NEodosiela (REDiM nemá známe API); pripraví zoznam chýbajúcich skupín, odkaz na správny portál, postup klikania a návrh textu
+zdôvodnenia, odošle ju používateľ sám. Prvotné založenie používateľa v aplikácii Klient je samostatná ServiceNow žiadosť (KB0016397).
+Názov skupiny `GHB_DEV_GEORGEPETE_WRITE` je na wiki poškodený (`CSINIGHB_…`); pred žiadosťou ho potvrď s používateľom/v REDiM.
 
 ## Kontrola ServiceNow požiadaviek
 Po kontrole oprávnení spusti `python check_tickets.py` (z `.github/scripts`; položky sú v `.github/skills/perf-setup/tickets.json`;
@@ -57,7 +64,7 @@ Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krok
    kedy sa load test robí, kto ho schvaľuje, koho informovať, Change/Incident management, okná a limity pre PROD.
    Bez technických detailov; čo na wiki nie je, povedz a odkáž na tím. Použi glosár pre nezrozumiteľné pojmy.
 2. **Prístupy:** z `01` zoznam Redim skupín (produkčný/testovací) a ServiceNow požiadaviek; spusti kontrolu oprávnení
-   (nižšie), zozbieraj čo chýba, odkáž na Windows request / ServiceNow. Nič nežiadaj za používateľa.
+   (nižšie), zozbieraj čo chýba, odkáž na REDiM (sekcia „Žiadosť o práva v REDiM“). Nič nežiadaj za používateľa.
 3. **Prostredie a prístup ku GitHubu/Artifactory:** spusti `check_env.py` a prejdi výsledky.
 4. **Zhrnutie:** kontrolný zoznam – vybavené / čaká / koho sa opýtať (zdroj: wiki, inak povedz, že kontakt nepoznáš).
 5. **Voliteľne: založenie repozitára.** Ponúkni až po kroku 4. Zisti názov a organizáciu (predvolene `csas-dev`);

@@ -39,14 +39,14 @@ def main() -> int:
     for env, groups in cfg["groups"].items():
         if a.env not in ("all", env):
             continue
-        print(f"[{env}]")
+        print(f"[{env}]  request rights in REDiM: {cfg.get('portals', {}).get(env, '?')}")
         for g in groups:
             ok = g.upper() in have or g.upper().split("\\")[-1] in have
             print(f"  {'OK        ' if ok else 'UNVERIFIED'} {g}")
             missing += not ok
     if missing:
         print(f"\n{missing} group(s) not verifiable from this machine (a Mac usually cannot list AD groups).")
-        print("Confirm with your Windows request status / ServiceNow, or run this on a Windows workstation.")
+        print("Confirm your request status in REDiM (links above), or run this on a Windows workstation.")
         return 2
     return 0
 

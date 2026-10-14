@@ -1,5 +1,5 @@
 {
-  "_note": "Source: wiki page 01 - GEORGEPETE - Pristupy - Vyvoj. 'CSINIGHB_DEV_GEORGEPETE_WRITE' is garbled in the export; verify the exact name (probably CSIN\\GHB_DEV_GEORGEPETE_WRITE).",
+  "_note": "Source: wiki page 01 + KB0016397 (ServiceNow). Rights are requested in REDiM (not ServiceNow): New request -> Set permissions -> application tile. 'CSIN\\GHB_DEV_GEORGEPETE_WRITE' is written as 'CSINIGHB_DEV_GEORGEPETE_WRITE' on the wiki (garbled backslash); confirm the exact name in REDiM.",
   "groups": {
     "prod": [
       "CSIN\\ART_GEORGEPETE_DELETE",
@@ -13,5 +13,9 @@
       "CSINT\\Alfred_Authentication_Users",
       "CSINT\\Alfred_Performance_Testing"
     ]
+  },
+  "portals": {
+    "prod": "https://iam.csin.cz/REDIM/my",
+    "test": "https://iamstp.csint.cz/redim/my"
   }
 }
