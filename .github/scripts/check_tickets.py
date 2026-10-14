@@ -9,7 +9,8 @@ A request counts if it was requested for you OR opened by you, and, when --team 
 for themselves (e.g. a shared team ticket). Matches from colleagues are marked with who opened them.
 
 Config: ../skills/perf-setup/tickets.json (required items + keywords).
-Credentials (from .env or environment):
+Credentials (from .env or environment); with SSO none are needed if you are logged in to ServiceNow in your browser:
+  (SSO) the session cookie is read from Edge/Chrome/Safari/Firefox, or set SERVICENOW_COOKIE=...
   SERVICENOW_URL=https://csasprod.service-now.com       (optional, this is the default)
   SERVICENOW_TOKEN=...                                  (Bearer/OAuth token)  or
   SERVICENOW_USER=... and SERVICENOW_PASSWORD=...       (Basic)
@@ -20,6 +21,7 @@ Output per required item: FOUND (state) / MISSING. Exit 0 = all found, 2 = somet
 import argparse
 import base64
 import json
+import re
 import os
 import sys
 import urllib.error
@@ -32,7 +34,36 @@ import sync_wiki_pages as sw  # reuses truststore + .env loading
 CONFIG = Path(__file__).resolve().parents[1] / "skills" / "perf-setup" / "tickets.json"
 
 
-def headers() -> dict[str, str]:
+def _browser_cookie(base: str) -> str:
+    """Read the live SSO session cookie of the ServiceNow host from a local browser."""
+    host = base.split("//", 1)[-1].split("/")[0]
+    try:
+        import browser_cookie3  # type: ignore[import-untyped]
+    except ImportError:
+        return ""
+    for name in ("edge", "chrome", "safari", "firefox", "brave"):
+        try:
+            jar = getattr(browser_cookie3, name)(domain_name=host)
+        except Exception:
+            continue
+        cookie = "; ".join(f"{c.name}={c.value}" for c in jar)
+        if cookie:
+            return cookie
+    return ""
+
+
+def _user_token(base: str, cookie: str) -> str:
+    """ServiceNow session auth also wants X-UserToken (g_ck), embedded in the home page."""
+    req = urllib.request.Request(base + "/", headers={"Cookie": cookie})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            m = re.search(r"g_ck\s*=\s*['\"]([0-9a-fA-F]+)['\"]", r.read().decode("utf-8", "replace"))
+            return m.group(1) if m else ""
+    except Exception:
+        return ""
+
+
+def headers(base: str = "https://csasprod.service-now.com") -> dict[str, str]:
     sw._load_secrets_file()
     tok = os.environ.get("SERVICENOW_TOKEN", "").strip()
     if tok:
@@ -41,12 +72,20 @@ def headers() -> dict[str, str]:
     if u and p:
         raw = base64.b64encode(f"{u}:{p}".encode()).decode()
         return {"Authorization": f"Basic {raw}", "Accept": "application/json"}
-    print("ERROR: set SERVICENOW_TOKEN (or SERVICENOW_USER + SERVICENOW_PASSWORD) in .env", file=sys.stderr)
+    cookie = os.environ.get("SERVICENOW_COOKIE", "").strip() or _browser_cookie(base)
+    if cookie:
+        h = {"Cookie": cookie, "Accept": "application/json"}
+        ck = _user_token(base, cookie)
+        if ck:
+            h["X-UserToken"] = ck
+        return h
+    print("ERROR: no ServiceNow credentials. Log in to ServiceNow in your browser (SSO) and re-run, "
+          "or set SERVICENOW_TOKEN / SERVICENOW_COOKIE in .env", file=sys.stderr)
     raise SystemExit(1)
 
 
 def get(base: str, path: str) -> list[dict]:
-    req = urllib.request.Request(base + path, headers=headers())
+    req = urllib.request.Request(base + path, headers=headers(base))
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read().decode("utf-8")).get("result", [])

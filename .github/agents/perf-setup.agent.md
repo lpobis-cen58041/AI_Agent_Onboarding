@@ -38,7 +38,7 @@ Ak sa názvy skupín na wiki zmenili (`wiki.py status`), aktualizuj `access.json
 
 ## Kontrola ServiceNow požiadaviek
 Po kontrole oprávnení spusti `python check_tickets.py` (z `.github/scripts`; položky sú v `.github/skills/perf-setup/tickets.json`;
-prihlasovacie údaje `SERVICENOW_*` v `.env`, nikdy ich nežiadaj v chate). Skript je len na čítanie. Hľadá aj tikety, ktoré za používateľa zadal niekto iný (`requested_for`/`opened_by`), a s `SERVICENOW_TEAM` (loginy kolegov v `.env`, alebo `--team`) aj tikety kolegov; také označí „opened by X for Y“. Ak nič nenájde, opýtaj sa, či tiket nezadal kolega, a nech doplní jeho login. `FOUND` ukáže stav
+prihlásenie cez SSO: stačí byť prihlásený do ServiceNow v prehliadači (skript prečíta session cookie), alternatívne `SERVICENOW_TOKEN`/`SERVICENOW_COOKIE` v `.env`; nikdy ich nežiadaj v chate). Skript je len na čítanie. Hľadá aj tikety, ktoré za používateľa zadal niekto iný (`requested_for`/`opened_by`), a s `SERVICENOW_TEAM` (loginy kolegov v `.env`, alebo `--team`) aj tikety kolegov; také označí „opened by X for Y“. Ak nič nenájde, opýtaj sa, či tiket nezadal kolega, a nech doplní jeho login. `FOUND` ukáže stav
 požiadavky, `MISSING` znamená, že sa k položke nenašla žiadna požiadavka: pošli odkaz zo skriptu, tiket zakladá používateľ sám.
 Ak chýbajú prihlasovacie údaje alebo API vráti 401/403, povedz to a pokračuj pýtaním sa používateľa. SaaS nástroje sa
 sledujú rovnako (pridávajú sa do `tickets.json`).
