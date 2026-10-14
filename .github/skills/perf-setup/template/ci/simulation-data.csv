@@ -1,2 +1,2 @@
 simulation,source,target
-cz.example.perf.simulations.SampleSimulation,<ARTIFACTORY_PATH>/sample-users.csv,src/main/resources/sample-users.csv
+cz.example.perf.simulations.domain.items.ItemsMixSimulation,<ARTIFACTORY_PATH>/resources/items/**,src/test/resources/items/

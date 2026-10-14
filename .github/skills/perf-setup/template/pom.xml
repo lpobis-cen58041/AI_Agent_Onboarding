@@ -58,6 +58,55 @@
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>groovy-maven-plugin</artifactId>
+        <version>2.1.1</version>
+        <executions>
+          <execution>
+            <id>generate-paths</id>
+            <phase>generate-sources</phase>
+            <goals><goal>execute</goal></goals>
+            <configuration>
+              <source><![CDATA[
+                def envDir = new File(project.basedir, 'src/main/resources/env')
+                def load = { f -> def p = new Properties(); f.withReader('UTF-8') { p.load(it) }; p }
+                def keys = new ArrayList(load(new File(envDir, 'test.properties')).stringPropertyNames())
+                Collections.sort(keys)
+                envDir.listFiles().findAll { it.name.endsWith('.properties') }.each { f ->
+                    def fileKeys = load(f).stringPropertyNames() as Set
+                    if (fileKeys != (keys as Set)) {
+                        fail("Key set mismatch in ${f.name}")
+                    }
+                }
+                def outDir = new File(project.build.directory, 'generated-sources/paths/cz/example/perf/config')
+                outDir.mkdirs()
+                def sb = new StringBuilder()
+                sb.append('// GENERATED - do not edit. Source of keys: src/main/resources/env/test.properties\n')
+                sb.append('package cz.example.perf.config\n\nobject Paths {\n')
+                keys.each { k -> sb.append("    val ${k}: String get() = Env[\"${k}\"]\n") }
+                sb.append('}\n')
+                new File(outDir, 'Paths.kt').setText(sb.toString(), 'UTF-8')
+              ]]></source>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>add-generated-paths</id>
+            <phase>generate-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+              <sources><source>${project.build.directory}/generated-sources/paths</source></sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
         <version>${kotlin.version}</version>

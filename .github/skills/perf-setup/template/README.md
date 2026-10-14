@@ -6,7 +6,7 @@ Sample Gatling + Kotlin performance-test project (Java 17, Maven Wrapper).
 ```bash
 ./mvnw -q test-compile
 ./mvnw test
-./mvnw -q gatling:test -Dgatling.simulationClass=cz.example.perf.simulations.SampleSimulation \
+./mvnw -q gatling:test -Dgatling.simulationClass=cz.example.perf.simulations.domain.items.ItemsMixSimulation \
   -DbaseUrl=<BASE_URL> -DdurationSec=30 -DtargetRps=2
 ```
 

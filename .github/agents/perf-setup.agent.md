@@ -52,7 +52,7 @@ Vedie ho po jednom kroku, stručne, cituj zdrojový súbor a pred ďalším krok
 4. **Voliteľne: založenie repozitára.** Ponúkni až po kroku 3. Zisti názov a organizáciu (predvolene `csas-dev`);
    ak nepoznáš schválený postup/šablónu, povedz to a opýtaj sa. Lokálny repozitár vytvor skriptom (z `.github/scripts`, s aktívnym `.venv`):
    `python scaffold.py <názov> --dest <priečinok> --runner <label>` (šablóna `.github/skills/perf-setup/template/`:
-   Gatling + Kotlin, Java 17, Maven Wrapper; skript nahradí zástupné hodnoty, spustí `./mvnw -q test` a urobí `git init` + commit).
+   Gatling + Kotlin, Java 17, Maven Wrapper, doménová štruktúra `domain/<doména>/{requests,steps,flows,usecases,data}` + `simulations/domain/<doména>/` podľa referenčného repozitára; skript nahradí zástupné hodnoty, spustí `./mvnw -q test` a urobí `git init` + commit).
    Zisti názov, cieľový priečinok (predvolene `~/dev`) a runner label (ak ho nepozná, použi `ubuntu-latest`).
    Lokálne vytvorenie je bezpečné a stačí na test fungovania; ak používateľ len testuje, tu skonči.
    Vytvor vzdialený repozitár až po explicitnom potvrdení názvu a
