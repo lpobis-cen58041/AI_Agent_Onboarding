@@ -106,9 +106,9 @@
   "id": "coding-newbie-new-domain",
   "prompt": "Nikdy som nepísal Gatling ani Kotlin. Chcem pridať novú doménu orders a otestovať ju. Ako začneme?",
   "must": [
-   "(requests|request)",
-   "(flow|usecase)",
-   "(new_domain|dry-run|mvnw)"
+   "(new_domain|scaffold)",
+   "(doménu|domain|doména)",
+   "(začn|postup|krok)"
   ],
   "must_not": [
    "gh repo create"

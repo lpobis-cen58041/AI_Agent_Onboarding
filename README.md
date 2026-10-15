@@ -1,10 +1,10 @@
 # perf-agent
 
-Copilot custom agent **`perf-setup`**: non-technical onboarding of new members into the GEORGEPETE / PERF
+Copilot custom agent **`perf-orchestrator`**: non-technical onboarding of new members into the GEORGEPETE / PERF
 (Gatling load tests) process. It uses Confluence snapshots as knowledge base, checks access, tickets and the
 local environment, and can optionally scaffold a local sample perf-test repository.
 
-The agent definition is `.github/agents/perf-setup.agent.md` (reload VS Code after changing it).
+The agent definition is `.github/agents/perf-orchestrator.agent.md` (reload VS Code after changing it).
 
 ## Quick start (new user)
 ```bash
@@ -13,7 +13,7 @@ pip install -r requirements.txt
 cp .env.example .env        # then fill in values; .env is git-ignored, never commit or paste it into chat
 ```
 Required: `CONFLUENCE_TOKEN` (Confluence → Settings → Personal Access Tokens). Everything else is optional.
-Then open the repo in VS Code and talk to the `perf-setup` agent. On first run it downloads the wiki snapshots.
+Then open the repo in VS Code and talk to the `perf-orchestrator` agent. On first run it downloads the wiki snapshots.
 
 ## Configuration (`.env`)
 | Variable | Used by | Purpose |
@@ -36,7 +36,7 @@ Then open the repo in VS Code and talk to the `perf-setup` agent. On first run i
 | `check_connection.py`, `read_page.py`, `crawl_confluence.py`, `sync_wiki_pages.py` | Confluence helpers (`sync_wiki_pages.py` holds shared auth + `.env` loader) | local files |
 
 ## Layout
-- `.github/agents/perf-setup.agent.md` – agent instructions
+- `.github/agents/perf-orchestrator.agent.md` – agent instructions
 - `.github/skills/perf-setup/`
   - `sources.json` – wiki pages/trees to snapshot (`wiki/` and `manifest.json` are git-ignored: internal content)
   - `access.json` – Redim groups per environment, REDiM portals, MiLA API URLs
@@ -63,7 +63,7 @@ template (env key parity, CI rows, domain layout, no internal hosts) and `scaffo
 - **Change the sample repo:** edit `.github/skills/perf-setup/template/`, keep it generic (no real endpoints or
   data), verify with `./mvnw test` and `python scaffold.py test-repo --dest /tmp/x`. Follow the reference repo's
   conventions (domain layout, matching path/package/class, weights sum to 100).
-- **Agent text:** `.github/agents/perf-setup.agent.md`. Reload VS Code afterwards.
+- **Agent text:** `.github/agents/perf-orchestrator.agent.md`. Reload VS Code afterwards.
 
 ## Security
 - Never commit `.env`, tokens, cookies or wiki snapshots (internal content). The agent never reads `.env`.
@@ -88,3 +88,7 @@ Agent beží len s `view/glob/grep` (nič nespustí ani nezmení). Beh ~15 s na 
 ### Kódovanie s agentom
 
 Po onboardingu vie agent (krok 7) previesť úplného začiatočníka pridaním novej domény: vysvetlí vrstvy, vytvorí kostru cez `new_domain.py`, spustí `./mvnw -q test` a `detekt:check`, a pomôže ju upraviť. Scenár je v `.github/skills/perf-setup/coding-guide.md`.
+
+### Architektúra: orchestrátor + sub-agenti vytváraní za behu
+
+Existuje jediný definovaný agent `perf-orchestrator`. Sub-agentov (knowledge, access, env, repo, coder, reviewer) nikto nepíše ručne: orchestrátor ich pri každom kroku sám vytvorí a zložením zadania z dát v `.github/skills/perf-setup/` (`playbooks/*.md`, `rules.md`, `access.json`, `glossary.md`, `coding-guide.md`, wiki snapshoty). Každý krok má plán s kritériami hotovosti, vykonanie sub-agentom, nezávislú kontrolu sub-agentom „reviewer“ (`VERDICT: PASS/FAIL`) a najviac 3 iterácie opráv. Správanie sa mení úpravou playbookov a pravidiel, nie vytváraním agentov. Scenáre s orchestrátorom trvajú pár minút.

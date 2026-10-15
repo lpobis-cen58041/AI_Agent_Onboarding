@@ -1,4 +1,4 @@
-"""Run conversation scenarios against the perf-setup agent with Copilot CLI (needs a logged-in `copilot`).
+"""Run conversation scenarios against the perf-orchestrator agent with Copilot CLI (needs a logged-in `copilot`).
 
   python tests/run_scenarios.py [--only ID ...] [--runs N] [--model MODEL] [-j 4]
 
@@ -21,7 +21,7 @@ SCENARIOS = Path(__file__).with_name("scenarios.json")
 
 
 def ask(prompt: str, model: str | None) -> str:
-    cmd = ["copilot", "--agent", "perf-setup", "-p", prompt, "--available-tools", "view", "glob", "grep",
+    cmd = ["copilot", "--agent", "perf-orchestrator", "-p", prompt, "--available-tools", "view", "glob", "grep", "task",
            "--no-ask-user", "--silent", "--allow-all-paths"]
     if model:
         cmd += ["--model", model]

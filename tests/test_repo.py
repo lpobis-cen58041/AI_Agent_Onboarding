@@ -10,7 +10,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / ".github" / "scripts"
 SKILL = ROOT / ".github" / "skills" / "perf-setup"
-AGENT = ROOT / ".github" / "agents" / "perf-setup.agent.md"
+AGENTS_DIR = ROOT / ".github" / "agents"
+AGENT = AGENTS_DIR / "perf-orchestrator.agent.md"
+ALL_AGENTS = sorted(AGENTS_DIR.glob("*.agent.md"))
 TEMPLATE = SKILL / "template"
 
 
@@ -70,12 +72,12 @@ def test_agent_frontmatter():
     text = AGENT.read_text(encoding="utf-8")
     m = re.match(r"---\n(.*?)\n---\n", text, re.S)
     assert m, "missing frontmatter"
-    assert re.search(r"^name: perf-setup$", m.group(1), re.M)
+    assert re.search(r"^name: perf-orchestrator$", m.group(1), re.M)
     assert re.search(r"^description: .+", m.group(1), re.M)
 
 
 def test_agent_references_existing_scripts_and_files():
-    text = AGENT.read_text(encoding="utf-8")
+    text = "\n".join(f.read_text(encoding="utf-8") for f in ALL_AGENTS)
     for script in set(re.findall(r"`?(?:python )?([a-z_]+\.py)\b", text)):
         assert (SCRIPTS / script).exists(), f"agent mentions missing script {script}"
     for f in ("access.json", "tickets.json", "sources.json", "glossary.md"):
@@ -253,5 +255,61 @@ def test_coding_guide_and_agent_are_linked():
     guide = (SKILL / "coding-guide.md").read_text(encoding="utf-8")
     assert "new_domain.py" in guide and "UseCasesTest" in guide
     agent = AGENT.read_text(encoding="utf-8")
-    assert "coding-guide.md" in agent and "new_domain.py" in agent
-    assert "--dry-run" in agent
+    assert "coding-guide.md" in agent
+
+
+# ---- orchestrator + playbooks ------------------------------------------------------------
+
+PLAYBOOKS = SKILL / "playbooks"
+EXPECTED = {"knowledge", "access", "env", "repo", "coder", "reviewer"}
+
+
+def test_orchestrator_is_the_only_agent_and_can_spawn():
+    assert [f.name for f in ALL_AGENTS] == ["perf-orchestrator.agent.md"]
+    front = re.match(r"---\n(.*?)\n---\n", AGENT.read_text(encoding="utf-8"), re.S).group(1)
+    assert "'agent'" in re.search(r"^tools: \[(.*?)\]", front, re.M).group(1)
+
+
+def test_orchestrator_references_existing_data():
+    text = AGENT.read_text(encoding="utf-8")
+    for rel in re.findall(r"`(\.github/[^`*{}]+?\.(?:md|json))`", text):
+        assert (ROOT / rel).exists(), rel
+    for name in EXPECTED:
+        assert f"`{name}`" in text or f"{name}.md" in text, name
+
+
+def test_playbooks_exist_and_use_real_scripts():
+    assert {p.stem for p in PLAYBOOKS.glob("*.md")} == EXPECTED
+    for p in PLAYBOOKS.glob("*.md"):
+        for s in set(re.findall(r"([a-z_]+\.py)\b", p.read_text(encoding="utf-8"))):
+            assert (SCRIPTS / s).exists(), f"{p.name}: {s}"
+
+
+def test_rules_file_carries_safety_rules_and_orchestrator_embeds_them():
+    rules = (SKILL / "rules.md").read_text(encoding="utf-8")
+    assert "nikdy nečítaj ani nevypisuj" in rules and "Nič si nevymýšľaj" in rules
+    assert "nespúšťaj záťaž" in rules.lower() and "necommituj" in rules
+    assert "rules.md" in AGENT.read_text(encoding="utf-8")
+
+
+def test_orchestrator_has_verification_loop():
+    text = AGENT.read_text(encoding="utf-8")
+    assert "reviewer" in text and "VERDICT" in text and "najviac 3 iterácie" in text
+    assert "NEodosiela" in text and "explicitného potvrdenia" in text
+
+
+def test_reviewer_playbook_is_read_only_verdict():
+    text = (PLAYBOOKS / "reviewer.md").read_text(encoding="utf-8")
+    assert "VERDICT: PASS" in text and "VERDICT: FAIL" in text
+
+
+def test_coder_playbook_links_guide():
+    text = (PLAYBOOKS / "coder.md").read_text(encoding="utf-8")
+    assert "coding-guide.md" in text and "new_domain.py" in text and "--dry-run" in text
+
+
+def test_agent_frontmatter_is_valid_yaml():
+    import yaml
+    front = re.match(r"---\n(.*?)\n---\n", AGENT.read_text(encoding="utf-8"), re.S).group(1)
+    data = yaml.safe_load(front)
+    assert data["name"] == "perf-orchestrator" and "agent" in data["tools"]
