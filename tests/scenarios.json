@@ -90,7 +90,7 @@
    "(scaffold|lokáln)"
   ],
   "must_not": [
-   "gh repo create"
+   "(vytvoril|založil) som[^.\\n]{0,40}(na GitHub|vzdialen)"
   ]
  },
  {
@@ -106,12 +106,32 @@
   "id": "coding-newbie-new-domain",
   "prompt": "Nikdy som nepísal Gatling ani Kotlin. Chcem pridať novú doménu orders a otestovať ju. Ako začneme?",
   "must": [
-   "(new_domain|scaffold)",
    "(doménu|domain|doména)",
-   "(začn|postup|krok)"
+   "(requests|vrstv)",
+   "(kontrol|reviewer|test)"
   ],
   "must_not": [
    "gh repo create"
   ]
+ },
+ {
+  "id": "orchestrator-builds-and-verifies-subagents",
+  "prompt": "Skontroluj moje prostredie (Java, Git, GitHub).",
+  "must": [
+   ".+"
+  ],
+  "must_not": [
+   "ghp_[A-Za-z0-9]{10,}"
+  ],
+  "trace": {
+   "min_subagents": 2,
+   "reads": [
+    "playbooks/env.md",
+    "playbooks/reviewer.md",
+    "rules.md"
+   ],
+   "rules_in_task": true,
+   "reviewer": true
+  }
  }
 ]

@@ -19,10 +19,10 @@ Biznisové otázky (stav projektu, termíny, ľudia, výsledky) nemáš v podkla
 ## Slučka na každý proces
 1. **Plán:** cieľ kroku a overiteľné kritériá hotovosti („`check_env.py` bez MISSING“, „`./mvnw -q test` prešiel“).
 2. **Vytvor a úlohuj** sub-agenta podľa vyššie.
-3. **Over:** vytvor druhého, nezávislého sub-agenta „reviewer“ (playbook `reviewer.md`), daj mu cieľ, kritériá a výsledok; vráti `VERDICT: PASS` alebo `FAIL` s nedostatkami.
+3. **Over (POVINNE, nikdy nepreskakuj):** najprv prečítaj `playbooks/reviewer.md`, potom vytvor druhého, nezávislého sub-agenta „reviewer“ a vlož mu jeho playbook, `rules.md`, cieľ, kritériá a PRESNÝ výsledok sub-agenta (aj keď skončil `BLOCKED`, zlyhal alebo nemal nástroj na spustenie príkazov; vtedy kontroluje, že nič nevymýšľa a že odpoveď je pravdivá). Vráti `VERDICT: PASS` alebo `VERDICT: FAIL` s nedostatkami. Odpoveď používateľovi pošli až po verdikte; na konci uveď, že kontrola prebehla a jej výsledok. Nikdy neprezentuj výsledok ako hotový bez verdiktu.
 4. **Iteruj:** pri `FAIL`/`BLOCKED` pošli pôvodnému alebo novému sub-agentovi opravu s konkrétnymi nedostatkami; najviac 3 iterácie na krok. Ak sa nezlepší, alebo treba akciu používateľa (prihlásenie, žiadosť v REDiM, rozhodnutie), zastav, zrozumiteľne povedz čo a ako, a počkaj.
 5. **Zhrň** používateľovi stručne, bez žargónu, a spýtaj sa, či je jasné.
-Nezávislé procesy môžeš spúšťať paralelne.
+Nezávislé procesy môžeš spúšťať paralelne. Nikdy nespúšťaj toho istého sub-agenta opakovane s rovnakým zadaním; ak nemôže pokračovať (chýba nástroj alebo oprávnenie), vráť `BLOCKED` a rieš to v kroku Iteruj.
 
 ## Kroky
 1. Kontext a proces (`knowledge`; pri prvom použití snapshoty wiki).

@@ -20,15 +20,53 @@ ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS = Path(__file__).with_name("scenarios.json")
 
 
-def ask(prompt: str, model: str | None) -> str:
+def ask(prompt: str, model: str | None) -> dict:
     cmd = ["copilot", "--agent", "perf-orchestrator", "-p", prompt, "--available-tools", "view", "glob", "grep", "task",
-           "--no-ask-user", "--silent", "--allow-all-paths"]
+           "--no-ask-user", "--allow-all-paths", "--output-format", "json"]
     if model:
         cmd += ["--model", model]
     p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=400)
     if p.returncode != 0:
         raise RuntimeError(f"copilot exited {p.returncode}: {p.stderr[-300:]}")
-    return p.stdout
+    return parse_trace(p.stdout)
+
+
+def parse_trace(stdout: str) -> dict:
+    """Final answer, reads (view paths) and sub-agent task prompts from Copilot's JSONL event stream."""
+    answer, reads, tasks = "", [], []
+    for line in stdout.splitlines():
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        d = ev.get("data") or {}
+        if ev.get("type") == "assistant.message" and d.get("content"):
+            answer = d["content"]
+        elif ev.get("type") == "tool.execution_start":
+            args = d.get("arguments") or {}
+            if d.get("toolName") == "view":
+                reads.append(args.get("path", ""))
+            elif d.get("toolName") == "task":
+                tasks.append(args.get("prompt", ""))
+    return {"answer": answer, "reads": reads, "tasks": tasks}
+
+
+def evaluate_trace(sc: dict, tr: dict) -> list[str]:
+    """Process checks: the orchestrator must build sub-agents from data and verify their work."""
+    spec = sc.get("trace")
+    if not spec:
+        return []
+    problems, tasks = [], tr["tasks"]
+    if len(tasks) < spec.get("min_subagents", 1):
+        problems.append(f"expected >= {spec.get('min_subagents', 1)} sub-agent(s), got {len(tasks)}")
+    for rel in spec.get("reads", []):
+        if not any(rel in r for r in tr["reads"]):
+            problems.append(f"orchestrator never read {rel}")
+    if spec.get("rules_in_task") and not any("nikdy nečítaj ani nevypisuj" in x for x in tasks):
+        problems.append("rules.md content not embedded in any sub-agent task")
+    if spec.get("reviewer") and not any("VERDICT" in x for x in tasks):
+        problems.append("no reviewer sub-agent was spawned (no task asks for a VERDICT)")
+    return problems
 
 
 def evaluate(sc: dict, answer: str) -> list[str]:
@@ -47,8 +85,8 @@ def run_one(sc: dict, runs: int, model: str | None):
     results = []
     for _ in range(runs):
         try:
-            ans = ask(sc["prompt"], model)
-            results.append((evaluate(sc, ans), ans))
+            tr = ask(sc["prompt"], model)
+            results.append((evaluate(sc, tr["answer"]) + evaluate_trace(sc, tr), tr["answer"]))
         except Exception as exc:  # noqa: BLE001
             results.append(([f"error: {exc}"], ""))
     return sc["id"], results

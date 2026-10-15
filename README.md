@@ -92,3 +92,5 @@ Po onboardingu vie agent (krok 7) previesť úplného začiatočníka pridaním 
 ### Architektúra: orchestrátor + sub-agenti vytváraní za behu
 
 Existuje jediný definovaný agent `perf-orchestrator`. Sub-agentov (knowledge, access, env, repo, coder, reviewer) nikto nepíše ručne: orchestrátor ich pri každom kroku sám vytvorí a zložením zadania z dát v `.github/skills/perf-setup/` (`playbooks/*.md`, `rules.md`, `access.json`, `glossary.md`, `coding-guide.md`, wiki snapshoty). Každý krok má plán s kritériami hotovosti, vykonanie sub-agentom, nezávislú kontrolu sub-agentom „reviewer“ (`VERDICT: PASS/FAIL`) a najviac 3 iterácie opráv. Správanie sa mení úpravou playbookov a pravidiel, nie vytváraním agentov. Scenáre s orchestrátorom trvajú pár minút.
+
+Scenár `orchestrator-builds-and-verifies-subagents` kontroluje stopu behu (JSON udalosti Copilot CLI): orchestrátor prečíta playbooky a `rules.md`, vytvorí aspoň 2 sub-agentov, pravidlá vloží do zadania a spustí reviewera (zadanie obsahuje `VERDICT`). Bez kontroly test zlyhá.
