@@ -87,11 +87,11 @@ def test_agent_references_existing_scripts_and_files():
 
 def test_agent_safety_rules_present():
     text = AGENT.read_text(encoding="utf-8")
-    assert "nikdy nečítaj ani nevypisuj" in text            # never read .env
-    assert "Nič si nevymýšľaj" in text
-    assert "NEodosiela" in text                              # no autonomous request submission
-    assert "explicitného potvrdenia" in text or "explicitnom potvrdení" in text
-    assert "necommituj" in text.lower()
+    assert "Never read or print the content of `.env`" in text
+    assert "Invent nothing" in text
+    assert "does NOT submit access requests" in text         # no autonomous request submission
+    assert "explicit confirmation" in text
+    assert "Never commit secrets" in text
 
 
 def test_agent_has_no_embedded_secrets():
@@ -223,9 +223,46 @@ def _scaffolded(tmp_path):
     return tmp_path / "nd"
 
 
+def new_domain(repo, *args):
+    """Runs the generator exactly as a user of the scaffolded repo would."""
+    return subprocess.run([sys.executable, ".github/scripts/new_domain.py", ".", *args], cwd=repo,
+                          capture_output=True, text=True)
+
+
+def test_scaffold_includes_coding_agent(tmp_path):
+    repo = _scaffolded(tmp_path)
+    agent = repo / ".github/agents/perf-coding.agent.md"
+    assert agent.exists() and "name: perf-coding" in agent.read_text(encoding="utf-8")
+    for rel in (".github/skills/perf-coding/rules.md", ".github/skills/perf-coding/coding-guide.md",
+                ".github/skills/perf-coding/playbooks/coder.md", ".github/skills/perf-coding/playbooks/reviewer.md",
+                ".github/scripts/new_domain.py"):
+        assert (repo / rel).exists(), rel
+    r = run("scaffold.py", "nd2", "--dest", str(tmp_path), "--no-test", "--no-git")
+    assert "copilot --agent perf-coding" in r.stdout
+
+
+def test_coding_agent_is_self_contained_and_valid(tmp_path):
+    import yaml
+    repo = _scaffolded(tmp_path)
+    text = (repo / ".github/agents/perf-coding.agent.md").read_text(encoding="utf-8")
+    data = yaml.safe_load(re.match(r"---\n(.*?)\n---\n", text, re.S).group(1))
+    assert data["name"] == "perf-coding" and "agent" in data["tools"]
+    for rel in re.findall(r"`(\.github/[^`*{}<>\s]+?\.(?:md|py))`", text):
+        assert (repo / rel).exists(), rel
+    for needed in ("VERDICT", "at most 3 iterations", "MANDATORY", "Never read or print `.env`"):
+        assert needed in text, needed
+    assert "perf-setup" not in text and "wiki" not in text.lower()
+    rules = (repo / ".github/skills/perf-coding/rules.md").read_text(encoding="utf-8")
+    assert "Never commit secrets" in rules and "Never run load against TEST/PROD" in rules
+    review = (repo / ".github/skills/perf-coding/playbooks/reviewer.md").read_text(encoding="utf-8")
+    assert "VERDICT: PASS" in review and "VERDICT: FAIL" in review and "detekt:check" in review
+    guide = (repo / ".github/skills/perf-coding/coding-guide.md").read_text(encoding="utf-8")
+    assert "new_domain.py" in guide and "UseCasesTest" in guide
+
+
 def test_new_domain_creates_all_layers_and_registers_it(tmp_path):
     repo = _scaffolded(tmp_path)
-    r = run("new_domain.py", str(repo), "orders", "--path", "/orders", "--method", "POST")
+    r = new_domain(repo, "orders", "--path", "/orders", "--method", "POST")
     assert r.returncode == 0, r.stderr
     k = repo / "src/main/kotlin/cz/example/perf"
     for layer in ("data/OrdersFeeders", "requests/OrdersRequests", "steps/OrdersSteps",
@@ -242,26 +279,23 @@ def test_new_domain_creates_all_layers_and_registers_it(tmp_path):
 def test_new_domain_dry_run_and_refusals(tmp_path):
     repo = _scaffolded(tmp_path)
     before = (repo / "ci/simulation-data.csv").read_text()
-    assert run("new_domain.py", str(repo), "orders", "--dry-run").returncode == 0
+    assert new_domain(repo, "orders", "--dry-run").returncode == 0
     assert not (repo / "src/main/kotlin/cz/example/perf/domain/orders").exists()
     assert (repo / "ci/simulation-data.csv").read_text() == before
-    assert run("new_domain.py", str(repo), "Bad_Name").returncode != 0
-    assert run("new_domain.py", str(repo), "items").returncode != 0          # already exists
-    assert run("new_domain.py", str(tmp_path), "orders").returncode != 0     # not a perf repo
-    assert run("new_domain.py", str(repo), "orders", "--path", "orders").returncode != 0
-
-
-def test_coding_guide_and_agent_are_linked():
-    guide = (SKILL / "coding-guide.md").read_text(encoding="utf-8")
-    assert "new_domain.py" in guide and "UseCasesTest" in guide
-    agent = AGENT.read_text(encoding="utf-8")
-    assert "coding-guide.md" in agent
+    assert new_domain(repo, "Bad_Name").returncode != 0
+    assert new_domain(repo, "items").returncode != 0                         # already exists
+    assert new_domain(repo, "orders", "--path", "orders").returncode != 0
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    r = subprocess.run([sys.executable, str(repo / ".github/scripts/new_domain.py"), str(empty), "orders"],
+                       capture_output=True, text=True)
+    assert r.returncode != 0                                                 # not a perf repo
 
 
 # ---- orchestrator + playbooks ------------------------------------------------------------
 
 PLAYBOOKS = SKILL / "playbooks"
-EXPECTED = {"knowledge", "access", "env", "repo", "coder", "reviewer"}
+EXPECTED = {"knowledge", "access", "env", "repo", "reviewer"}
 
 
 def test_orchestrator_is_the_only_agent_and_can_spawn():
@@ -287,25 +321,38 @@ def test_playbooks_exist_and_use_real_scripts():
 
 def test_rules_file_carries_safety_rules_and_orchestrator_embeds_them():
     rules = (SKILL / "rules.md").read_text(encoding="utf-8")
-    assert "nikdy nečítaj ani nevypisuj" in rules and "Nič si nevymýšľaj" in rules
-    assert "nespúšťaj záťaž" in rules.lower() and "necommituj" in rules
+    assert "Never read or print the content of `.env`" in rules and "Invent nothing" in rules
+    assert "Never submit requests or run load" in rules and "Never commit secrets" in rules
     assert "rules.md" in AGENT.read_text(encoding="utf-8")
 
 
 def test_orchestrator_has_verification_loop():
     text = AGENT.read_text(encoding="utf-8")
-    assert "reviewer" in text and "VERDICT" in text and "najviac 3 iterácie" in text
-    assert "NEodosiela" in text and "explicitného potvrdenia" in text
+    assert "reviewer" in text and "VERDICT" in text and "at most 3 iterations" in text
+    assert "does NOT submit access requests" in text and "explicit confirmation" in text
+
+
+def test_orchestrator_hands_off_coding_to_the_new_repo():
+    text = AGENT.read_text(encoding="utf-8")
+    assert "copilot --agent perf-coding" in text
+    assert "`coder`" not in text
+    assert "copilot --agent perf-coding" in (PLAYBOOKS / "repo.md").read_text(encoding="utf-8")
+
+
+def test_agents_are_written_in_english():
+    files = [*ALL_AGENTS, *PLAYBOOKS.glob("*.md"), SKILL / "rules.md", SKILL / "glossary.md",
+             *(TEMPLATE / ".github").rglob("*.md")]
+    slovak = re.compile(r"[ďľĺŕňťôäěščřžýáíéú]|\b(nikdy|pravidl|používateľ|odpovedaj|krok)\w*", re.I)
+    for f in files:
+        hits = [m.group(0) for m in slovak.finditer(f.read_text(encoding="utf-8"))]
+        # REDiM/Czech UI labels are quoted on purpose (Nová žádost, Nastavit oprávnění, Přístupy)
+        hits = [h for h in hits if h.lower() not in {"ž", "á", "í", "ě", "š", "ř", "é", "ú", "ý", "č", "ň"}]
+        assert not hits, f"{f.name}: non-English text {hits[:5]}"
 
 
 def test_reviewer_playbook_is_read_only_verdict():
     text = (PLAYBOOKS / "reviewer.md").read_text(encoding="utf-8")
     assert "VERDICT: PASS" in text and "VERDICT: FAIL" in text
-
-
-def test_coder_playbook_links_guide():
-    text = (PLAYBOOKS / "coder.md").read_text(encoding="utf-8")
-    assert "coding-guide.md" in text and "new_domain.py" in text and "--dry-run" in text
 
 
 def test_agent_frontmatter_is_valid_yaml():

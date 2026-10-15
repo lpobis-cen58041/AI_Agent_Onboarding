@@ -32,7 +32,7 @@ Then open the repo in VS Code and talk to the `perf-orchestrator` agent. On firs
 | `check_tickets.py` | read-only ServiceNow request check (SSO via browser cookie) | no |
 | `request_access.py` | submit REDiM requests via API; dry run by default, `--submit` + typed "yes" | only with `--submit` |
 | `scaffold.py <name> --dest <dir>` | create a local sample Gatling/Kotlin repo from the template | new local dir |
-| `new_domain.py <repo> <domain> [--path /x] [--method GET\|POST] [--dry-run]` | add a domain skeleton (all layers, simulation, unit test, env keys, CI row) to a scaffolded repo | new files + appends to env/CI csv |
+| `new_domain.py . <domain> [--path /x] [--method GET\|POST] [--dry-run]` | add a domain skeleton (all layers, simulation, unit test, env keys, CI row); lives in the scaffolded repo (`.github/scripts/`), run from its root | new files + appends to env/CI csv |
 | `check_connection.py`, `read_page.py`, `crawl_confluence.py`, `sync_wiki_pages.py` | Confluence helpers (`sync_wiki_pages.py` holds shared auth + `.env` loader) | local files |
 
 ## Layout
@@ -85,12 +85,22 @@ python tests/run_scenarios.py [--only ID ...] [--runs 3] [--model MODEL] [-v]
 
 Agent beží len s `view/glob/grep` (nič nespustí ani nezmení). Beh ~15 s na scenár, výstup modelu sa mení, preto pri zlyhaní pozri odpoveď (`-v`) a až potom uprav prompt alebo regex. Nie je súčasťou CI.
 
-### Kódovanie s agentom
+### Kódovanie s agentom (v novom repe)
 
-Po onboardingu vie agent (krok 7) previesť úplného začiatočníka pridaním novej domény: vysvetlí vrstvy, vytvorí kostru cez `new_domain.py`, spustí `./mvnw -q test` a `detekt:check`, a pomôže ju upraviť. Scenár je v `.github/skills/perf-setup/coding-guide.md`.
+Kódovanie sa nerobí v tomto repe. Onboarding (krok 6) vytvorí vzorový repozitár cez `scaffold.py` a vypíše príkaz:
+
+```
+cd <repo> && copilot --agent perf-coding
+```
+
+Agent `perf-coding` je súčasťou šablóny (`.github/skills/perf-setup/template/`), takže ho má každé nové repo. Vedie úplného začiatočníka: vysvetlí vrstvy, vytvorí kostru cez `.github/scripts/new_domain.py`, spustí `./mvnw -q test` a `detekt:check` a výsledok overí reviewer. Návod: `.github/skills/perf-coding/coding-guide.md` v novom repe.
 
 ### Architektúra: orchestrátor + sub-agenti vytváraní za behu
 
-Existuje jediný definovaný agent `perf-orchestrator`. Sub-agentov (knowledge, access, env, repo, coder, reviewer) nikto nepíše ručne: orchestrátor ich pri každom kroku sám vytvorí a zložením zadania z dát v `.github/skills/perf-setup/` (`playbooks/*.md`, `rules.md`, `access.json`, `glossary.md`, `coding-guide.md`, wiki snapshoty). Každý krok má plán s kritériami hotovosti, vykonanie sub-agentom, nezávislú kontrolu sub-agentom „reviewer“ (`VERDICT: PASS/FAIL`) a najviac 3 iterácie opráv. Správanie sa mení úpravou playbookov a pravidiel, nie vytváraním agentov. Scenáre s orchestrátorom trvajú pár minút.
+Texty agentov, playbookov a pravidiel sú po anglicky. Agenti sú dvaja: `perf-orchestrator` (onboarding, toto repo) a `perf-coding` (v novom repe). Sub-agentov (knowledge, access, env, repo, reviewer; v novom repe coder, reviewer) nikto nepíše ručne: orchestrátor ich pri každom kroku sám vytvorí a zložením zadania z dát v `.github/skills/perf-setup/` (`playbooks/*.md`, `rules.md`, `access.json`, `glossary.md`, wiki snapshoty). Každý krok má plán s kritériami hotovosti, vykonanie sub-agentom, nezávislú kontrolu sub-agentom „reviewer“ (`VERDICT: PASS/FAIL`) a najviac 3 iterácie opráv. Správanie sa mení úpravou playbookov a pravidiel, nie vytváraním agentov. Scenáre s orchestrátorom trvajú pár minút.
 
 Scenár `orchestrator-builds-and-verifies-subagents` kontroluje stopu behu (JSON udalosti Copilot CLI): orchestrátor prečíta playbooky a `rules.md`, vytvorí aspoň 2 sub-agentov, pravidlá vloží do zadania a spustí reviewera (zadanie obsahuje `VERDICT`). Bez kontroly test zlyhá.
+
+Scenár `coding-agent-adds-domain-end-to-end` (agent `perf-coding`, všetky nástroje, dočasné scaffoldnuté repo) je pomalý: spúšťa sa cez `--slow`.
+
+Poznámka: v VS Code musí byť zapnutý nástroj Run Subagent; IntelliJ nie je overený. Bez nástroja pre sub-agentov robí orchestrátor kroky playbooku sám.

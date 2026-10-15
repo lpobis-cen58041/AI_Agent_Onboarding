@@ -54,6 +54,7 @@ def main() -> int:
         run("add", "-A")
         run("commit", "-q", "-m", "Initial commit from perf-setup template")
         print("Initialized git repository with first commit.")
+    print(f"\nNext: cd {target} && copilot --agent perf-coding   (coding agent: add a domain + tests)")
     return 0
 
 

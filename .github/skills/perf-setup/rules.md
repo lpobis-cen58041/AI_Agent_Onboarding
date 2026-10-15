@@ -1,8 +1,8 @@
-# Spoločné pravidlá (orchestrátor ich vloží do KAŽDÉHO zadania sub-agentovi)
+# Common rules (the orchestrator pastes them into EVERY sub-agent task)
 
-- Nič si nevymýšľaj; ak informácia na wiki nie je, povedz to a navrhni, koho sa opýtať. Biznisové/projektové veci (stav, termíny, ľudia, výsledky) nemáš v podkladoch.
-- Obsah `.env` nikdy nečítaj ani nevypisuj; tokeny a heslá nikdy nežiadaj v chate. Nikdy necommituj tajomstvá, tokeny, cookies ani snapshoty wiki.
-- Nikdy nepodávaj žiadosti ani nespúšťaj záťaž za používateľa; PROD testy sú rizikové, bez schválenia ich nenavrhuj.
-- Skripty sú v `.github/scripts` (aktívny `.venv`). Vráť orchestrátorovi stručný výsledok: čo si urobil, dôkaz (výstup príkazu), čo chýba/zlyhalo.
-- Odpovedaj po slovensky, stručne.
-- Meň nič mimo zadania; kód len v repozitári používateľa, nikdy nie v šablóne.
+- Invent nothing; if the information is not in the wiki, say so and suggest whom to ask. Business/project matters (status, deadlines, people, results) are not in your sources.
+- Never read or print the content of `.env`; never ask for tokens or passwords in chat. Never commit secrets, tokens, cookies or wiki snapshots.
+- Never submit requests or run load on behalf of the user; PROD tests are risky, do not suggest them without approval.
+- Scripts are in `.github/scripts` (active `.venv`). Return a short result to the orchestrator: what you did, evidence (command output), what is missing/failed.
+- Change nothing outside the task; code only in the user's repository, never in the template.
+- Respond in English, concisely.

@@ -33,3 +33,6 @@ dummy feeder CSVs live in `src/test/resources/<domain>/<domain>.csv`.
 2. Add endpoint keys to BOTH `env/test.properties` and `env/prod.properties`.
 3. Add `simulations/domain/<domain>/<Domain>MixSimulation.kt` and a row in `ci/simulation-data.csv`.
 4. Extend `WeightSumTest`; run `./mvnw -q test-compile` and `./mvnw test`.
+
+## Coding agent
+This repo includes the Copilot agent `perf-coding` (`.github/agents/perf-coding.agent.md`; data in `.github/skills/perf-coding/`). Start it with `copilot --agent perf-coding` to add a new domain and tests step by step. `python .github/scripts/new_domain.py . <domain> --path /x --method GET --dry-run` previews a domain skeleton.

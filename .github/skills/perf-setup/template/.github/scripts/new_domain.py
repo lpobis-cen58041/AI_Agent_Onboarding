@@ -1,6 +1,6 @@
 """Add a new domain skeleton (requests/steps/flows/usecases/data, simulation, tests) to a perf repo.
 
-  python new_domain.py <repo-dir> <domain> [--path /orders] [--method GET|POST] [--dry-run]
+  python .github/scripts/new_domain.py <repo-dir> <domain> [--path /orders] [--method GET|POST] [--dry-run]
 
 <domain> is lowercase letters/digits (e.g. orders). Creates only new files, edits only
 env/test.properties, env/prod.properties and ci/simulation-data.csv (append), and refuses to
@@ -182,7 +182,7 @@ class {D}UseCasesTest {{
     for f, line in appends.items():
         t = f.read_text(encoding="utf-8")
         f.write_text(t + ("" if t.endswith("\n") else "\n") + line, encoding="utf-8")
-    print(f"\nNext: cd {repo} && ./mvnw -q test")
+    print("\nNext: ./mvnw -q test (in the repo directory)")
     return 0
 
 
