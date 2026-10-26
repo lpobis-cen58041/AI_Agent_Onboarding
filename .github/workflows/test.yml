@@ -2,6 +2,11 @@ name: Test agent repo
 
 on:
   workflow_dispatch:
+    inputs:
+      local_http:
+        description: Run owned loopback HTTP contracts after the build
+        type: boolean
+        default: false
   pull_request:
   push:
     branches: [main, master]
@@ -20,7 +25,14 @@ jobs:
           java-version: 17
       - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: python -m pytest -q tests
-      # template must build and pass its own checks
+      # Both clean and explicit demo scaffolds must build.
       - run: |
-          python .github/scripts/scaffold.py ci-sample --dest "$RUNNER_TEMP" --no-git
-          cd "$RUNNER_TEMP/ci-sample" && ./mvnw -q detekt:check
+          python .github/scripts/scaffold.py ci-project --dest "$RUNNER_TEMP" --no-git
+          (cd "$RUNNER_TEMP/ci-project" && ./mvnw -q detekt:check)
+          python "$RUNNER_TEMP/ci-project/.github/scripts/new_domain.py" "$RUNNER_TEMP/ci-project" orders
+          (cd "$RUNNER_TEMP/ci-project" && ./mvnw -q test detekt:check)
+          python .github/scripts/scaffold.py ci-demo --demo --dest "$RUNNER_TEMP" --no-git
+          (cd "$RUNNER_TEMP/ci-demo" && ./mvnw -q detekt:check)
+      - name: Owned loopback HTTP contracts (opt-in)
+        if: github.event_name == 'workflow_dispatch' && inputs.local_http
+        run: cd "$RUNNER_TEMP/ci-demo" && python .github/scripts/check_items_http.py

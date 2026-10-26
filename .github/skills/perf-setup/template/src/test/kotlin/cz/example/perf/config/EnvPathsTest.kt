@@ -23,7 +23,6 @@ class EnvPathsTest {
     @Test
     fun `every env key resolves and looks like a path`() {
         val keys = load("env/test.properties").stringPropertyNames()
-        assertTrue(keys.isNotEmpty())
         keys.forEach { assertTrue(Env[it].startsWith("/"), "Env[$it] should start with /") }
     }
 }

@@ -1,0 +1,27 @@
+name: Demo HTTP contracts
+
+on:
+  workflow_dispatch:
+    inputs:
+      local_http:
+        description: Run owned loopback demo HTTP contracts
+        type: boolean
+        default: false
+
+jobs:
+  demo:
+    runs-on: <RUNNER_LABEL>
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: ./mvnw -q test detekt:check
+      - uses: actions/setup-python@v5
+        if: github.event_name == 'workflow_dispatch' && inputs.local_http
+        with:
+          python-version: "3.12"
+      - name: Owned loopback HTTP contracts (opt-in)
+        if: github.event_name == 'workflow_dispatch' && inputs.local_http
+        run: python .github/scripts/check_items_http.py

@@ -11,7 +11,7 @@ import java.time.Duration
 abstract class SimulationSetup : Simulation() {
     protected fun run(scn: ScenarioBuilder, protocol: HttpProtocolBuilder) {
         val duration = Duration.ofSeconds(Config.durationSeconds)
-        setUp(scn.injectOpen(constantUsersPerSec(Config.targetRps).during(duration)))
+        setUp(scn.injectOpen(constantUsersPerSec(Config.usersPerSecond).during(duration)))
             .protocols(protocol)
             .assertions(global().failedRequests().percent().lt(Config.maxFailedPercent))
     }

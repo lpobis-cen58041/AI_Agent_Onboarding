@@ -1,15 +1,18 @@
 """Add a new domain skeleton (requests/steps/flows/usecases/data, simulation, tests) to a perf repo.
 
-  python .github/scripts/new_domain.py <repo-dir> <domain> [--path /orders] [--method GET|POST] [--dry-run]
+  python .github/scripts/new_domain.py <repo-dir> <domain> [--path /orders] [--method GET|POST] [--dry-run] [--task ID]
 
 <domain> is lowercase letters/digits (e.g. orders). Creates only new files, edits only
 env/test.properties, env/prod.properties and ci/simulation-data.csv (append), and refuses to
-overwrite anything. Afterwards run `./mvnw -q test` in the repo.
+overwrite anything. Also creates docs/<domain>.md. With an active coding task, --task must name
+its approved, unchanged, passing baseline. Afterwards run `./mvnw -q test` in the repo.
 """
 import argparse
 import re
 import sys
 from pathlib import Path
+
+from task_state import generation_task
 
 
 def main() -> int:
@@ -19,6 +22,7 @@ def main() -> int:
     ap.add_argument("--path", help="endpoint path, default /<domain>")
     ap.add_argument("--method", choices=["GET", "POST"], default="GET")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--task", help="approved coding task; requires a recorded passing baseline")
     a = ap.parse_args()
 
     repo = a.repo.expanduser().resolve()
@@ -28,6 +32,11 @@ def main() -> int:
     path = a.path or f"/{a.domain}"
     if not path.startswith("/"):
         print("ERROR: --path must start with '/'.", file=sys.stderr)
+        return 1
+    try:
+        generation_task(repo, a.domain, a.task)
+    except (ValueError, OSError) as exc:
+        print(f"ERROR: generator task: {exc}", file=sys.stderr)
         return 1
     marker = next((repo / "src/main/kotlin").rglob("setup/UseCase.kt"), None)
     if marker is None:
@@ -135,6 +144,13 @@ import kotlin.test.assertTrue
 
 class {D}UseCasesTest {{
     @Test
+    fun `{d} default mix has the exact name and weight`() {{
+        GatlingTestBootstrap.init()
+        assertEquals(listOf("basic{D}"), {D}UseCases.all.map {{ it.name }})
+        assertEquals(listOf(100.0), {D}UseCases.all.map {{ it.defaultWeight }})
+    }}
+
+    @Test
     fun `{d} use case weights sum to 100`() {{
         GatlingTestBootstrap.init()
         assertEquals(100.0, {D}UseCases.all.sumOf {{ it.defaultWeight }}, 0.0001)
@@ -150,6 +166,21 @@ class {D}UseCasesTest {{
 }}
 ''',
         repo / f"src/test/resources/{d}/{d}.csv": "token\nlocal-dummy-token-1\nlocal-dummy-token-2\n",
+        repo / f"docs/{d}.md": f'''# {D}
+
+Generated starting contract: `{a.method} {path}`, expected status `200`.
+The default mix contains only `basic{D}` at weight `100`.
+Adapt this document and the generated request/tests together if the agreed contract differs.
+
+- Simulation: `{pkg}.simulations.domain.{d}.{D}MixSimulation`.
+- Endpoint key: `{key}` in both environment property files.
+- Feeder: `src/test/resources/{d}/{d}.csv`, containing synthetic dummy tokens only.
+- CI mapping: `ci/simulation-data.csv`; artifact storage and an execution workflow are not provisioned.
+
+Use `./mvnw -q test detekt:check` for unit/static checks. These do not exercise HTTP.
+Shared-environment execution needs the readiness checklist and separate team authorization;
+the coding agent never launches TEST/PROD traffic.
+''',
     }
     appends = {
         repo / "src/main/resources/env/test.properties": f"{key}={path}\n",

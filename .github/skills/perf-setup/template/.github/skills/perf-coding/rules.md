@@ -1,9 +1,12 @@
-# Rules (the orchestrator pastes them into EVERY sub-agent task)
+# Shared rules (paste VERBATIM into every worker task)
 
-- Never read or print the content of `.env`; never ask for tokens or passwords in chat. Never commit secrets, tokens, cookies or internal URLs.
-- Use dummy data only (`local-dummy-*`). Never add real endpoints or data.
-- Never run load against TEST/PROD; a smoke run only against the user's own local mock. PROD tests are risky; do not suggest them without approval.
-- Change only what the task requires, inside this repository (source, tests, config for the requested domain).
-- Make small steps and run the tests after each; return what you did, the evidence (command output) and what is missing/failed.
-- Invent nothing; if you do not know, say so.
-- Respond in English, concisely.
+- Never read or print the content of `.env`; never ask for tokens or passwords in chat. Never commit secrets, tokens, cookies or internal URLs. Use dummy data only (`local-dummy-*`), including task records and evidence excerpts.
+- Change only the requested repository/code scope and authorized task bookkeeping. Preserve pre-existing edits and unrelated behavior. Do not regenerate an existing domain or duplicate its simulation/CI mapping.
+- Never invent missing contracts, data dependencies, weights, approvals or evidence. Distinguish supplied facts, user confirmation, reported checks and independently reviewed results.
+- Unit/static checks do not verify HTTP behavior, achieved RPS or production readiness. For a request/scenario change without HTTP execution, say "HTTP behavior was not exercised". `constantUsersPerSec` means virtual-user arrivals, not exact HTTP requests per second. Read the local `Config`/`SimulationSetup` before using `usersPerSecond` or legacy `targetRps`; installation does not migrate configuration.
+- Never run load against TEST/PROD. HTTP traffic requires separate explicit approval of an owned loopback target, scenario and small bounded user/rate/duration limits. A default URL or bare "sure", "yes" or "OK" is not a confirmed target; do not probe it. Do not follow redirects outside that target. When the user wants a TEST/PRED or PROD run, present `run-readiness.md` as guidance instead of running anything.
+- If no mock exists, offer a synthetic one, but wait for explicit permission before creating it or starting a server. Separate preflight evidence from scenario traffic. A listening server is not a passed contract check. Stop check-only helpers in cleanup; a refused connection is a blocker, not permission to retry guessed ports.
+- Run-only tasks need independent review of captured commands, target/limits, requests and assertions. Do not repeat traffic without separate approval or demand success when reviewing a captured blocker.
+- Do not run competing Maven processes in one checkout. Reuse valid baseline evidence; perform one combined final check per successful coder/reviewer pass. After corrections rerun affected checks. Do not search session history, repeat successful checks for counts or rediscover supplied facts.
+- Permission waiting is not command execution time; do not retry a pending command, bypass approval or change permission settings to shorten timers.
+- Keep context and output scoped. Surface errors and unverified work explicitly. Respond in English, concisely.

@@ -1,0 +1,47 @@
+{
+  "strategy": "Cover each independent contract dimension, pairwise combinations explicitly marked compatible, and mandatory data/failure chains. Do not form an unrestricted Cartesian product.",
+  "cases": [
+    {"id":"new-domain-single-endpoint","area":"domain","dimensions":{"mode":"new","change":"endpoint"},"verification":"coding-agent-adds-domain-end-to-end"},
+    {"id":"new-domain-multiple-endpoints","area":"domain","dimensions":{"mode":"new","change":"multiple-endpoints"},"verification":"coding-new-domain-multiple-endpoints"},
+    {"id":"extend-existing-request-only","area":"domain","dimensions":{"mode":"existing","change":"request-only","mix":"preserve"},"verification":"coding-existing-endpoint-guidance"},
+    {"id":"extend-existing-journey","area":"domain","dimensions":{"mode":"existing","change":"journey","mix":"change"},"verification":"coding-agent-extends-domain-end-to-end"},
+    {"id":"change-mix-only","area":"domain","dimensions":{"mode":"existing","change":"mix-only"},"verification":"coding-mix-needs-weights"},
+    {"id":"unit-test-only","area":"domain","dimensions":{"change":"unit-test"},"verification":"coding-test-kind-clarification"},
+    {"id":"ambiguous-test-kind","area":"intake","dimensions":{"change":"test-unspecified"},"verification":"coding-test-kind-clarification"},
+    {"id":"unknown-existing-domain","area":"intake","dimensions":{"mode":"existing","domain":"unknown"},"verification":"coding-unknown-existing-domain"},
+    {"id":"domain-name-collision","area":"intake","dimensions":{"mode":"new","domain":"collision"},"verification":"coding-domain-collision"},
+    {"id":"gateway-channel-required","area":"profile","dimensions":{"profile":"gateway","route":"web-mobile-variant"},"verification":"coding-endpoint-gateway-channel"},
+    {"id":"public-text-no-auth","area":"profile","dimensions":{"profile":"public","response":"text","auth":"none-confirmed"},"verification":"coding-endpoint-public-text"},
+    {"id":"availability-valid-combination","area":"profile","dimensions":{"profile":"availability","payload":"json","variants":"contract-defined"},"verification":"coding-endpoint-availability-variants"},
+    {"id":"unknown-profile-blocks-guessing","area":"profile","dimensions":{"profile":"unknown"},"verification":"coding-unknown-profile"},
+    {"id":"get-query-and-path-parameters","area":"parameters","dimensions":{"method":"GET","body":"none","query":"query","inputs":"path-query"},"verification":"coding-endpoint-get-query"},
+    {"id":"post-json-with-response-extraction","area":"method-payload","dimensions":{"method":"POST","profile":"gateway","body":"json","response":"json-extraction"},"verification":"coding-endpoint-post-json"},
+    {"id":"put-json","area":"method-payload","dimensions":{"method":"PUT","body":"json"},"verification":"coding-endpoint-put-json"},
+    {"id":"patch-json-no-content","area":"method-payload","dimensions":{"method":"PATCH","body":"json","status":"204","response":"no-body"},"verification":"coding-endpoint-json-patch-intake"},
+    {"id":"delete-no-content","area":"method-payload","dimensions":{"method":"DELETE","body":"none","status":"204","response":"no-body"},"verification":"coding-endpoint-delete-204"},
+    {"id":"head-header-only","area":"method-payload","dimensions":{"method":"HEAD","body":"none","response":"headers-no-body"},"verification":"coding-endpoint-head"},
+    {"id":"options-status-only","area":"method-payload","dimensions":{"method":"OPTIONS","body":"none","response":"status-only"},"verification":"coding-endpoint-options"},
+    {"id":"post-form-urlencoded","area":"method-payload","dimensions":{"method":"POST","body":"form-urlencoded"},"verification":"coding-endpoint-form-urlencoded"},
+    {"id":"post-multipart-dummy-file","area":"method-payload","dimensions":{"method":"POST","body":"multipart","file":"synthetic"},"verification":"coding-endpoint-multipart"},
+    {"id":"other-content-type-needs-contract","area":"method-payload","dimensions":{"body":"other","content-type":"unspecified"},"verification":"coding-endpoint-unknown-content-type"},
+    {"id":"accepted-202-bounded-polling","area":"response","dimensions":{"status":"202","response":"polling","bound":"explicit"},"verification":"coding-endpoint-202-polling"},
+    {"id":"response-value-correlates-next-request","area":"combined-flow","dimensions":{"dependency":"response-to-path","path-source":"path-variable","response-source":"response-extraction","producer":"producer-success","consumer":"dependent-request","failure":"stop-chain"},"verification":"coding-agent-extends-domain-end-to-end"},
+    {"id":"failed-producer-skips-dependent-request","area":"combined-flow","dimensions":{"dependency":"list-to-detail","producer":"producer-failure","consumer":"dependent-request-skipped","failure":"stop-chain"},"verification":"mock:list-failure"},
+    {"id":"failed-list-skips-summary","area":"combined-flow","dimensions":{"dependency":"list-to-summary","producer":"producer-failure","consumer":"dependent-request-skipped","failure":"stop-chain"},"verification":"mock:summary-list-failure"},
+    {"id":"mixed-profiles-do-not-leak","area":"combined-flow","dimensions":{"profiles":"public-and-gateway","isolation":"per-request"},"verification":"coding-endpoint-mixed-profiles"},
+    {"id":"contract-correction-invalidates-approval","area":"workflow","dimensions":{"decision":"correction","approval":"revoke"},"verification":"coding-interactive-new-domain"},
+    {"id":"plan-only-does-not-dispatch","area":"workflow","dimensions":{"decision":"plan-only","dispatch":"none"},"verification":"coding-interactive-existing-domain"},
+    {"id":"summary-rejects-invalid-json-value","area":"mock-contract","dimensions":{"response":"json-integer","invalid":"fractional"},"verification":"mock:summary-invalid"}
+  ],
+  "compatible_pairs": [
+    ["GET","none"],["GET","query"],["POST","json"],["POST","form-urlencoded"],["POST","multipart"],
+    ["PUT","json"],["PATCH","json"],["DELETE","none"],["HEAD","none"],["OPTIONS","none"],
+    ["public","text"],["gateway","json"],["availability","json"],
+    ["202","polling"],["204","no-body"],["path-variable","response-extraction"],
+    ["producer-success","dependent-request"],["producer-failure","dependent-request-skipped"]
+  ],
+  "mock_cases": [
+    "success","browse","list-failure","empty-list","missing-id","malformed-list","detail-failure","wrong-detail-id",
+    "summary-success","summary-list-failure","summary-invalid"
+  ]
+}

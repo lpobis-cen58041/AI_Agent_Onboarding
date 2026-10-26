@@ -1,27 +1,28 @@
 {
-  "_note": "Source: wiki page 01 + KB0016397 (ServiceNow). Rights are requested in the REDiM 'Windows' tile (not ServiceNow). Group CSIN\\GHB_DEV_GEORGEPETE_WRITE is written 'CSINIGHB_...' on the wiki (garbled backslash); the name was confirmed by the user.",
+  "_note": "Shared API Manager and Alfred recommendations, confirmed by the project owner; not a complete permission list for an existing project. Establish the SAS/repository and derive additional permissions from confirmed project mappings and intended tasks. Environment keys identify the REDiM portal, not permission to run load. GEORGEPETE-specific groups apply only to that existing project/resources. Request permissions in the REDiM Windows tile.",
   "groups": {
+    "prod": [
+      "XUC\\APIMAN_DEVELOPER"
+    ],
+    "test": [
+      "CSINT\\Alfred_Authentication_Users",
+      "CSINT\\Alfred_Performance_Testing"
+    ]
+  },
+  "georgepete_only_groups": {
     "prod": [
       "CSIN\\ART_GEORGEPETE_DELETE",
       "CSIN\\ART_GEORGEPETE_READ",
       "CSIN\\GeorgePete_Viewer",
-      "CSIN\\GHB_DEV_GEORGEPETE_WRITE",
-      "XUC\\APIMAN_DEVELOPER"
+      "CSIN\\GHB_DEV_GEORGEPETE_WRITE"
     ],
     "test": [
-      "CSINT\\GeorgePete_Viewer",
-      "CSINT\\Alfred_Authentication_Users",
-      "CSINT\\Alfred_Performance_Testing"
+      "CSINT\\GeorgePete_Viewer"
     ]
   },
   "portals": {
     "prod": "https://iam.csin.cz/REDIM/my",
     "test": "https://iamstp.csint.cz/redim/my"
   },
-  "redim_tile": "Windows",
-  "api": {
-    "test": "https://uat1-webapi-mila.vs.csin.cz/webapi/api/v2/redim",
-    "prod": "https://prod-webapi-mila.vs.csin.cz/webapi/api/v2/redim",
-    "_note": "MiLA GW, source: Confluence REDIM/8. REDIM API (API_Operace_AppAccess_v02). Needs an API key from API Manager with access to redim/requests."
-  }
+  "redim_tile": "Windows"
 }

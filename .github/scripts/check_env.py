@@ -1,6 +1,6 @@
 """Read-only check of the local environment and of access to GitHub and Artifactory.
 
-Usage: python check_env.py [--repo <git url>] [--artifactory <base url>]
+Usage: python check_env.py [--local-only] [--repo <git url>] [--artifactory <base url>]
 Prints OK / MISSING / UNREACHABLE per item. Never prints secrets.
 """
 import argparse
@@ -103,12 +103,16 @@ def check_http(name, url, hint=""):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--local-only", action="store_true",
+                    help="check Java, Git and IDE only; no network or authentication checks")
     ap.add_argument("--repo", default=DEFAULT_REPO)
     ap.add_argument("--artifactory", default=DEFAULT_ARTIFACTORY)
     args = ap.parse_args()
     check_java()
     check_tool("git", "Git", "install git")
     check_ide()
+    if args.local_only:
+        return
     check_github(args.repo)
     check_http("Artifactory", args.artifactory.rstrip("/") + "/api/system/ping", "VPN/proxy?")
     proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")

@@ -43,24 +43,23 @@ folder, for instance - instead of being forked per consumer.
 
 Auth (for --check-upstream and --update)
 -----------------------------------------
-Three auth strategies are tried in order:
+Configured tokens and cookies take precedence over browser-cookie extraction.
+Supported authentication methods:
 
-1. **Windows Edge SSO (default, no config needed).**
-   Uses the ``win32.internet`` (``winreg``-based) cookie store via
-   ``browser-cookie3`` (``pip install browser-cookie3``) if available, or
-   falls back to launching a headless Edge subprocess that navigates to
-   Confluence, lets Windows SSO authenticate automatically, and dumps the
-   session cookie.  Works on any ČSAS developer workstation where Edge is
-   already logged into the corporate identity provider.
+1. **Existing Edge session (fallback).**
+   Uses the browser cookie store via
+   ``browser-cookie3`` (``pip install browser-cookie3``) if available.
+   Existing-session access depends on the local OS and browser; this helper
+   does not launch a browser. Configured credentials take precedence.
 
 2. **``CONFLUENCE_TOKEN``** — Bearer API token generated in your Atlassian
-   profile.  Set this env var to skip the browser launch.
+   profile. Set this env var to skip browser-cookie extraction.
 
 3. **``CONFLUENCE_COOKIE``** — Full ``Cookie:`` header value copied from a
    live browser session.  Last resort for environments that support neither
    SSO extraction nor API tokens.
 
-Pass ``--no-browser`` to disable strategy 1 and go straight to env vars.
+Pass ``--no-browser`` to disable browser-cookie extraction and use only env vars.
 
 If all three strategies fail, the script exits 1 with a clear error message.
 The offline modes (--check / --integrity) always work without any auth.
@@ -207,44 +206,6 @@ def _extract_sso_cookie_via_browser_cookie3() -> str | None:
         return None
 
 
-def _extract_sso_cookie_via_subprocess() -> str | None:
-    """Launch Edge silently to let SSO authenticate, then extract the cookie.
-
-    Uses PowerShell + Edge DevTools protocol to grab cookies after SSO.
-    Only attempted on Windows.  Gracefully returns None on failure.
-    """
-    import subprocess  # noqa: PLC0415
-    import tempfile    # noqa: PLC0415
-
-    if sys.platform != "win32":
-        return None
-    ps_script = r"""
-$ErrorActionPreference = 'SilentlyContinue'
-$edge = (Get-Command msedge.exe -ErrorAction SilentlyContinue)?.Source
-if (-not $edge) { exit 1 }
-# Run Edge with remote debugging on a temp port to capture SSO cookie
-$port = 19222
-$job = Start-Process -PassThru -WindowStyle Hidden $edge `
-    "--headless --disable-gpu --remote-debugging-port=$port `
-     --profile-directory=Default cnfl.csin.cz" 2>$null
-Start-Sleep -Seconds 8
-try {
-    $resp = Invoke-WebRequest -Uri "http://localhost:$port/json" -UseBasicParsing -ErrorAction Stop
-    $pages = $resp.Content | ConvertFrom-Json
-    $target = ($pages | Where-Object { $_.url -like '*cnfl*' } | Select-Object -First 1).id
-    if ($target) {
-        $ws = New-Object System.Net.WebSockets.ClientWebSocket
-        $uri = [System.Uri]"ws://localhost:$port/json/version" # placeholder - full impl requires WebSocket
-    }
-} catch {}
-Stop-Process -Id $job.Id -ErrorAction SilentlyContinue
-"""
-    # The full DevTools WebSocket dance is complex; return None and let
-    # browser-cookie3 handle it.  This stub exists as the documented path
-    # for future enhancement.
-    return None
-
-
 def _load_secrets_file() -> None:
     """Load KEY=VALUE lines from <repo>/.env (gitignored) into os.environ if not already set."""
     for name in (".env",):
@@ -260,7 +221,7 @@ def _load_secrets_file() -> None:
 
 
 def _auth_headers() -> dict[str, str]:
-    """Resolve auth via: Edge SSO → CONFLUENCE_TOKEN → CONFLUENCE_COOKIE."""
+    """Resolve auth via configured token, configured cookie, then an existing Edge session."""
     _load_secrets_file()
     # Strategy 1: env var token (fastest, CI-friendly)
     token = os.environ.get("CONFLUENCE_TOKEN", "").strip()
@@ -275,10 +236,6 @@ def _auth_headers() -> dict[str, str]:
     if not _NO_BROWSER:
         # Strategy 3a: browser-cookie3 reads Edge's live cookie store (no popup)
         cookie = _extract_sso_cookie_via_browser_cookie3()
-        if cookie:
-            return {"Cookie": cookie}
-        # Strategy 3b: subprocess Edge SSO (stub — see _extract_sso_cookie_via_subprocess)
-        cookie = _extract_sso_cookie_via_subprocess()
         if cookie:
             return {"Cookie": cookie}
 

@@ -1,38 +1,48 @@
-# Copilot Instructions — __PROJECT_NAME__ (Gatling + Kotlin)
+# Repository conventions - __PROJECT_NAME__
 
-## Commands
-```bash
-./mvnw -q test-compile          # PR gate
-./mvnw test                     # unit tests
-./mvnw detekt:check             # static analysis (config: detekt.yml, run in PR check)
-./mvnw -q gatling:test -Dgatling.simulationClass="cz.example.perf.simulations.domain.items.ItemsMixSimulation" \
-  -DbaseUrl="<BASE_URL>" -DdurationSec=30 -DtargetRps=2
-```
+Read `.github/skills/perf-coding/rules.md` for shared safety and evidence boundaries.
+Role policy lives in `.github/agents/perf-coding.agent.md`; do not duplicate it here.
 
-## Architecture (domain-based)
+## Commands (Java 17)
+| Check | Command |
+|---|---|
+| Baseline unit tests | `./mvnw -q test` |
+| Final unit and static checks | `./mvnw -q test detekt:check` |
+| One existing unit-test class | `./mvnw -q -Dtest=<ExistingTestClass> test` |
+
+The final command runs both goals in one Maven invocation. Maven may download dependencies.
+HTTP execution is separate and subject to the shared runtime rules, not a prerequisite for coding.
+
+## Layout and invariants
 Under `src/main/kotlin/cz/example/perf/`:
-- `domain/<domain>/{requests,steps,flows,usecases,data}` — everything for one business domain
-- `simulations/domain/<domain>/<Domain>MixSimulation.kt` — Gatling simulation per domain
-- `setup/` (`UseCase`, `MixBuilder`, `SimulationSetup`), `config/` (`Config`, `Env`, `Protocols`), `auth/`
+- `domain/<domain>/{requests,steps,flows,usecases,data}` contains domain code.
+- `simulations/domain/<domain>/<Domain>MixSimulation.kt` owns a domain simulation.
+- `setup/` contains `UseCase`, weighted `MixBuilder` and arrival/assertion `SimulationSetup`.
+- `config/` contains `Config`, `Env`, `Protocols` and generated `Paths`; `auth/` prepares authentication.
 
-Layer order: requests → steps → flows → usecases → simulation. Never call requests from a simulation.
+Layer order: requests, steps, flows, usecases, simulation. Simulations do not call Requests directly.
+`Config` resolves JVM properties before same-named environment variables.
+Inspect `Config` and `SimulationSetup` for supported arrival-rate inputs; older repositories may expose
+only `targetRps`, newer ones `usersPerSecond`. `constantUsersPerSec` is user arrivals, not HTTP RPS.
+New projects contain shared infrastructure only; no domain or HTTP fixture is created by default.
+The optional `--demo` scaffold includes items and test-only HTTP fixtures, not additional real domains.
+An absent domain directory before the first domain is normal; do not create items to fill it.
+Paths come from both env files, `src/main/resources/env/{test,prod}.properties`, with identical key
+sets. Do not edit generated `Paths.kt` under `target/generated-sources/paths`.
+Feeder fixtures live in `src/test/resources/<domain>/<domain>.csv`.
 
-Resources: `src/main/resources/env/{test,prod}.properties` hold endpoint paths (identical key sets;
-`config/Paths.kt` is generated from them at build time — do not edit). Tests mirror the main layout;
-dummy feeder CSVs live in `src/test/resources/<domain>/<domain>.csv`.
+File/package/class/CI selectors must agree for each simulation. `ci/simulation-data.csv` lists
+`simulation,source,target`; reuse its row unless a new simulation is actually needed.
+Register a new use case in `all`, confirm its weight, and keep unique names and finite non-negative
+weights summing to 100. Tests must assert exact expected names and weights, not only their sum.
+Generated domains use `<Domain>UseCasesTest`. Only the optional items demo uses `WeightSumTest`.
+New scaffolds include `MixBuilderTest` for infrastructure without adding a domain; older checkouts
+may have only `WeightSumTest`. Select an actual existing class before a focused test invocation.
+Call `GatlingTestBootstrap.init()` before constructing Gatling DSL objects in unit tests.
 
-## Conventions
-- File path, package, class name of a simulation (and the workflow selector, when added) must match.
-- Use case weights per mix sum to 100 (checked by `WeightSumTest`; add each domain there).
-- Real feeder data is not committed; `ci/simulation-data.csv` (`simulation,source,target`) lists where CI
-  downloads it. Add a row for every new simulation/domain.
-- Use dummy tokens only; never commit real tokens, keys or internal URLs.
+## Agent entry
+`copilot --agent perf-coding --model gpt-6-astra -i "Start"`
 
-## Adding a new domain
-1. Create `domain/<domain>/{requests,steps,flows,usecases,data}` and a dummy CSV in `src/test/resources/<domain>/`.
-2. Add endpoint keys to BOTH `env/test.properties` and `env/prod.properties`.
-3. Add `simulations/domain/<domain>/<Domain>MixSimulation.kt` and a row in `ci/simulation-data.csv`.
-4. Extend `WeightSumTest`; run `./mvnw -q test-compile` and `./mvnw test`.
-
-## Coding agent
-This repo includes the Copilot agent `perf-coding` (`.github/agents/perf-coding.agent.md`; data in `.github/skills/perf-coding/`). Start it with `copilot --agent perf-coding` to add a new domain and tests step by step. `python .github/scripts/new_domain.py . <domain> --path /x --method GET --dry-run` previews a domain skeleton.
+`-i` sends the first message; without it, type `Start`. `/init` generates repository instructions,
+not the domain/test interview. The guide selects the implementation path; `endpoint-contracts.md`
+selects conditional technical questions. `.perf-coding/tasks/` contains ignored local task records.
